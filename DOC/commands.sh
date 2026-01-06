@@ -204,4 +204,4 @@ The -X theirs flag automatically resolves conflicts by taking the storage branch
 
 lsof -ti:3080 | xargs kill -9 2>/dev/null || echo "No process on port 3080"
 
-ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic ANTHROPIC_AUTH_TOKEN=a3cb9c0b97824f63a93101cb325e5b0e.1CD9Mw1GYqLhnMk9 claud
+ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic ANTHROPIC_AUTH_TOKEN=a3cb9c0b97824f63a93101cb325e5b0e.1CD9Mw1GYqLhnMk9 claude 
