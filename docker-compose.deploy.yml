@@ -1,22 +1,22 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: clubdeofertas_deploy_postgres
+    container_name: experience_club_deploy_postgres
     restart: always
     env_file:
       - .env.deploy
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-clubdeofertas}
+      POSTGRES_USER: ${POSTGRES_USER:-experienceclub}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-clubdeofertas}
+      POSTGRES_DB: ${POSTGRES_DB:-experienceclub}
     volumes:
       - postgres_deploy_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT:-15432}:5432"
     networks:
-      - clubdeofertas_deploy_network
+      - experience_club_deploy_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clubdeofertas}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-experienceclub}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,16 +28,16 @@ services:
       target: production
       args:
         NODE_ENV: production
-    container_name: clubdeofertas_deploy_backend
+    container_name: experience_club_deploy_backend
     restart: always
     env_file:
       - .env.deploy
       - ./backend/.env.deploy
     environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-clubdeofertas}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-clubdeofertas}?schema=public"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-experienceclub}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-experienceclub}?schema=public"
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-24h}
-      PORT: 3062
+      PORT: 3082
       HOSTNAME: 0.0.0.0
       NODE_ENV: production
       APP_VERSION_STRING: ${APP_VERSION_STRING:-Version 1.0.1-Club de Ofertas!}
@@ -50,13 +50,13 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "0.0.0.0:${BACKEND_PORT:-3062}:3062"
+      - "0.0.0.0:${BACKEND_PORT:-3082}:3082"
     volumes:
       - ./backend/uploads:/app/uploads
     networks:
-      - clubdeofertas_deploy_network
+      - experience_club_deploy_network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3062/api"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3082/api"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -76,7 +76,7 @@ services:
         NEXT_PUBLIC_ZAP_PHONE: ${NEXT_PUBLIC_ZAP_PHONE:-595985511359}
         NEXT_PUBLIC_FB_PIXEL_ID: ${NEXT_PUBLIC_FB_PIXEL_ID:-828208093122934}
         NODE_ENV: production
-    container_name: clubdeofertas_deploy_frontend
+    container_name: experience_club_deploy_frontend
     restart: always
     env_file:
       - .env.deploy
@@ -89,17 +89,17 @@ services:
       NEXT_PUBLIC_ZAP_PHONE: ${NEXT_PUBLIC_ZAP_PHONE}
       NEXT_PUBLIC_FB_PIXEL_ID: ${NEXT_PUBLIC_FB_PIXEL_ID}
       NODE_ENV: production
-      PORT: 3060
+      PORT: 3080
       HOSTNAME: 0.0.0.0
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - "0.0.0.0:${FRONTEND_PORT:-3060}:3060"
+      - "0.0.0.0:${FRONTEND_PORT:-3080}:3080"
     networks:
-      - clubdeofertas_deploy_network
+      - experience_club_deploy_network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3060"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3080"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -118,7 +118,7 @@ services:
         NEXT_PUBLIC_JWT_EXPIRATION: ${JWT_EXPIRATION:-24h}
         NEXT_PUBLIC_ADMIN_MODE: "true"
         NODE_ENV: production
-    container_name: clubdeofertas_deploy_admin
+    container_name: experience_club_deploy_admin
     restart: always
     env_file:
       - .env.deploy
@@ -130,17 +130,17 @@ services:
       NEXT_PUBLIC_IMAGE_BASE_URL: ${NEXT_PUBLIC_IMAGE_BASE_URL}
       NEXT_PUBLIC_ADMIN_MODE: "true"
       NODE_ENV: production
-      PORT: 3061
+      PORT: 3081
       HOSTNAME: 0.0.0.0
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - "0.0.0.0:${ADMIN_PORT:-3061}:3061"
+      - "0.0.0.0:${ADMIN_PORT:-3081}:3081"
     networks:
-      - clubdeofertas_deploy_network
+      - experience_club_deploy_network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3061"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3081"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -148,22 +148,22 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: clubdeofertas_deploy_pgadmin
+    container_name: experience_club_deploy_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@clubdeofertas.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@experienceclub.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
     volumes:
       - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
       - pgadmin_deploy_data:/var/lib/pgadmin
     ports:
-      - "5050:80"
+      - "5151:80"
     networks:
-      - clubdeofertas_deploy_network
+      - experience_club_deploy_network
 
 networks:
-  clubdeofertas_deploy_network:
+  experience_club_deploy_network:
     driver: bridge
 
 volumes:

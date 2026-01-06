@@ -97,7 +97,7 @@ check_database() {
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        if docker exec clubdeofertas_deploy_postgres pg_isready -U clubdeofertas > /dev/null 2>&1; then
+        if docker exec experience_club_deploy_postgres pg_isready -U experience_club > /dev/null 2>&1; then
             print_success "Database is healthy and ready!"
             return 0
         fi
@@ -219,7 +219,7 @@ if [ -f "import-products.js" ]; then
     print_info "Generating product SQL from import-products.js..."
     node import-products.js > /tmp/import-products.sql 2>&1
     if [ -f "/tmp/import-products.sql" ]; then
-        docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U clubdeofertas -d clubdeofertas < /tmp/import-products.sql > /dev/null 2>&1
+        docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U experience_club -d experience_club < /tmp/import-products.sql > /dev/null 2>&1
         check_command_warn "Products imported successfully" "Some products may have been skipped"
     else
         print_warning "Failed to generate SQL, skipping product import"
@@ -227,22 +227,22 @@ if [ -f "import-products.js" ]; then
 else
     print_warning "import-products.js not found, skipping product import"
     print_info "You can manually import products later using:"
-    print_info "  docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U clubdeofertas -d clubdeofertas < your_backup.sql"
+    print_info "  docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U experience_club -d experience_club < your_backup.sql"
 fi
 
 print_header "SYSTEM VALIDATION"
 
 print_step "5.1" "Waiting for backend API to be ready..."
-wait_for_service "Backend API" "3062"
+wait_for_service "Backend API" "3082"
 
 print_step "5.2" "Waiting for frontend application..."
-wait_for_service "Frontend" "3060"
+wait_for_service "Frontend" "3080"
 
 print_step "5.3" "Waiting for admin application..."
-wait_for_service "Admin Panel" "3061"
+wait_for_service "Admin Panel" "3081"
 
 print_step "5.4" "Testing API endpoints..."
-API_RESPONSE=$(curl -s "http://localhost:3062/api/products?page=1&limit=1" 2>&1)
+API_RESPONSE=$(curl -s "http://localhost:3082/api/products?page=1&limit=1" 2>&1)
 if echo "$API_RESPONSE" | grep -q "products"; then
     PRODUCT_COUNT=$(echo "$API_RESPONSE" | grep -o '"total":[0-9]*' | cut -d: -f2)
     print_success "Products API is working (${PRODUCT_COUNT:-0} products in database)"
@@ -254,16 +254,16 @@ else
     print_warning "Products API may need more time to initialize"
 fi
 
-if curl -s "http://localhost:3062/api/brands" > /dev/null; then
+if curl -s "http://localhost:3082/api/brands" > /dev/null; then
     print_success "Brands API is working"
 else
     print_warning "Brands API may need more time to initialize"
 fi
 
 print_step "5.5" "Testing authentication..."
-if curl -s -X POST "http://localhost:3062/api/auth/login" \
+if curl -s -X POST "http://localhost:3082/api/auth/login" \
      -H "Content-Type: application/json" \
-     -d '{"email": "admin@clubdeofertas.com", "password": "admin123456"}' | grep -q "access_token"; then
+     -d '{"email": "admin@experience_club.com", "password": "admin123456"}' | grep -q "access_token"; then
     print_success "Authentication system is working"
 else
     print_warning "Authentication may need more time to initialize"
@@ -278,15 +278,15 @@ echo "🌐 Your applications are now running on:"
 echo "┌─────────────────────────────────────────────────────────┐"
 echo "│  Service         │  URL                               │"
 echo "│─────────────────┼────────────────────────────────────│"
-echo "│  Frontend Store  │  http://localhost:3060             │"
-echo "│  Admin Panel     │  http://localhost:3061             │"
-echo "│  Backend API     │  http://localhost:3062/api         │"
+echo "│  Frontend Store  │  http://localhost:3080             │"
+echo "│  Admin Panel     │  http://localhost:3081             │"
+echo "│  Backend API     │  http://localhost:3082/api         │"
 echo "│  Database        │  localhost:15432 (ext) / 5432 (int)│"
-echo "│  pgAdmin         │  http://localhost:5050             │"
+echo "│  pgAdmin         │  http://localhost:5151             │"
 echo "└─────────────────────────────────────────────────────────┘"
 echo ""
 echo "🔐 Default admin credentials:"
-echo "• Email: admin@clubdeofertas.com"
+echo "• Email: admin@experience_club.com"
 echo "• Password: admin123456"
 echo ""
 echo "📊 Database contains:"
@@ -306,7 +306,7 @@ echo "📚 Documentation:"
 echo "• See CLAUDE.md for complete development guide"
 echo "• See DOC/.MD/DEPLOYMENT_SUCCESS_SUMMARY.md for next steps"
 echo "• See DOC/.MD/DOCKER_DEPLOYMENT_COMPLETE.md for full deployment guide"
-echo "• API documentation available at http://localhost:3062/api/docs"
+echo "• API documentation available at http://localhost:3082/api/docs"
 echo ""
 echo "⚠️  IMPORTANT NEXT STEPS:"
 echo "1. Configure reverse proxy (Nginx/Apache) to route domains to ports"
@@ -323,12 +323,12 @@ docker-compose -f docker-compose.deploy.yml ps
 
 # Show product count
 echo ""
-PRODUCT_COUNT=$(docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U clubdeofertas -d clubdeofertas -t -c "SELECT COUNT(*) FROM \"Product\";" 2>/dev/null | tr -d ' \n')
+PRODUCT_COUNT=$(docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U experience_club -d experience_club -t -c "SELECT COUNT(*) FROM \"Product\";" 2>/dev/null | tr -d ' \n')
 if [ ! -z "$PRODUCT_COUNT" ]; then
     print_info "Database statistics:"
     echo "  • Products: $PRODUCT_COUNT"
     if [ "$PRODUCT_COUNT" -eq 0 ]; then
         print_warning "Database is empty! Import your products data:"
-        echo "    docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U clubdeofertas -d clubdeofertas < your_backup.sql"
+        echo "    docker-compose -f docker-compose.deploy.yml exec -T postgres psql -U experience_club -d experience_club < your_backup.sql"
     fi
 fi
