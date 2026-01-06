@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-server
+    restart: always
+    ports:
+      - '25432:5432'
+    env_file:
+      - .env
+    volumes:
+      #- ~/postgres:/var/lib/postgresql/data
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=experienceclub
+      - POSTGRES_PASSWORD=Ma1x1x0x!!Ma1x1x0x!!
+      - POSTGRES_DB=experienceclub  
+
+##  mongodb:
+##      image: mongo:latest
+##      container_name: mongodbn
+##      restart: unless-stopped
+##      env_file:
+##        - .env
+##      environment:
+##  #      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+##  #      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}    
+##  #      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+##  #      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+##         - MONGO_INITDB_DATABASE=${MONGO_DB}
+##         - PUID=1000
+##         - PGID=1000
+##      ports:
+##        - ${MONGO_INT_PORT}:${MONGO_EXT_PORT}
+##      volumes:
+##        - ./mongodb/database:/data/db
+##        - ./.docker/mongo/:/docker-entrypoint-initdb.d/:ro
+##
+##  mongo-express:
+##    image: mongo-express
+##    container_name: mongoexpress
+##    restart: unless-stopped
+##    env_file:
+##      - .env
+##    ports:
+##      - ${ME_INT_PORT}:${ME_EXT_PORT}
+##    environment:
+##      - ME_CONFIG_MONGODB_SERVER=${ME_CONFIG_MONGODB_SERVER} #db docker / localhost local-running
+##      - ME_CONFIG_MONGODB_AUTH_USERNAME=${ME_CONFIG_MONGODB_AUTH_USERNAME}
+##      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${ME_CONFIG_MONGODB_AUTH_PASSWORD}
+##      - ME_CONFIG_MONGODB_ADMINUSERNAME=${ME_CONFIG_MONGODB_ADMINUSERNAME}
+##      - ME_CONFIG_MONGODB_ADMINPASSWORD=${ME_CONFIG_MONGODB_ADMINPASSWORD}
+##      - ME_CONFIG_MONGODB_URL=mongodb://${ME_CONFIG_MONGODB_ADMINUSERNAME}:${ME_CONFIG_MONGODB_ADMINPASSWORD}@mongo:27017/?authSource=admin
+##    depends_on:
+##      - mongodb
+##    links:
+##      - mongodb
+##
+
+volumes:
+  postgres:
+    name: server-db-postgres
+##  mongodb:
+##    name: server-db-mongo
+##  mongo-express:
+##    name: server-db-mongo-express  

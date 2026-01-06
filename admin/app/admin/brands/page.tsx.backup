@@ -1,0 +1,496 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+
+export default function BrandsPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<any>(null);
+  const itemsPerPage = 12;
+
+  const [brands, setBrands] = useState([
+    {
+      id: 1,
+      name: 'Calvin Klein',
+      slug: 'calvin-klein',
+      logo: '/images/brands/calvin-klein.jpg',
+      description: 'Fragancias modernas y sofisticadas para hombres y mujeres',
+      products_count: 45,
+      status: 'active',
+      created_at: '2024-01-15',
+      country: 'Estados Unidos'
+    },
+    {
+      id: 2,
+      name: 'Hugo Boss',
+      slug: 'hugo-boss',
+      logo: '/images/brands/hugo-boss.jpg',
+      description: 'Perfumes elegantes con carácter distintivo',
+      products_count: 38,
+      status: 'active',
+      created_at: '2024-01-14',
+      country: 'Alemania'
+    },
+    {
+      id: 3,
+      name: 'Chanel',
+      slug: 'chanel',
+      logo: '/images/brands/chanel.jpg',
+      description: 'Lujo francés en fragancias exclusivas',
+      products_count: 62,
+      status: 'active',
+      created_at: '2024-01-13',
+      country: 'Francia'
+    },
+    {
+      id: 4,
+      name: 'Tom Ford',
+      slug: 'tom-ford',
+      logo: '/images/brands/tom-ford.jpg',
+      description: 'Fragancias de lujo con ingredientes premium',
+      products_count: 29,
+      status: 'active',
+      created_at: '2024-01-12',
+      country: 'Estados Unidos'
+    },
+    {
+      id: 5,
+      name: 'Versace',
+      slug: 'versace',
+      logo: '/images/brands/versace.jpg',
+      description: 'Perfumes italianos con estilo y glamour',
+      products_count: 34,
+      status: 'active',
+      created_at: '2024-01-11',
+      country: 'Italia'
+    },
+    {
+      id: 6,
+      name: 'Dior',
+      slug: 'dior',
+      logo: '/images/brands/dior.jpg',
+      description: 'Elegancia francesa en cada fragancia',
+      products_count: 51,
+      status: 'active',
+      created_at: '2024-01-10',
+      country: 'Francia'
+    }
+  ]);
+
+  const [newBrand, setNewBrand] = useState({
+    name: '',
+    description: '',
+    country: '',
+    logo: '',
+    status: 'active'
+  });
+
+  const filteredBrands = brands.filter(brand =>
+    brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    brand.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    brand.country.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredBrands.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentBrands = filteredBrands.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleCreateBrand = (e: React.FormEvent) => {
+    e.preventDefault();
+    const brand = {
+      id: brands.length + 1,
+      ...newBrand,
+      slug: newBrand.name.toLowerCase().replace(/\s+/g, '-'),
+      products_count: 0,
+      created_at: new Date().toISOString().split('T')[0]
+    };
+    setBrands([...brands, brand]);
+    setNewBrand({ name: '', description: '', country: '', logo: '', status: 'active' });
+    setShowCreateModal(false);
+    alert('Marca creada exitosamente');
+  };
+
+  const handleEditBrand = (brand: any) => {
+    setEditingBrand(brand);
+    setNewBrand(brand);
+    setShowCreateModal(true);
+  };
+
+  const handleUpdateBrand = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBrands(brands.map(b => b.id === editingBrand.id ? {
+      ...b,
+      ...newBrand,
+      id: editingBrand.id,
+      slug: newBrand.name.toLowerCase().replace(/\s+/g, '-')
+    } : b));
+    setNewBrand({ name: '', description: '', country: '', logo: '', status: 'active' });
+    setEditingBrand(null);
+    setShowCreateModal(false);
+    alert('Marca actualizada exitosamente');
+  };
+
+  const handleDeleteBrand = (id: number) => {
+    if (confirm('¿Estás seguro de que deseas eliminar esta marca?')) {
+      setBrands(brands.filter(b => b.id !== id));
+      alert('Marca eliminada exitosamente');
+    }
+  };
+
+  const toggleStatus = (id: number) => {
+    setBrands(brands.map(b => 
+      b.id === id ? { ...b, status: b.status === 'active' ? 'inactive' : 'active' } : b
+    ));
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestión de Marcas</h1>
+          <p className="text-gray-600 dark:text-gray-400">Administra las marcas de productos</p>
+        </div>
+        <div className="flex space-x-3">
+          <Link
+            href="/admin/products"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            ← Productos
+          </Link>
+          <button
+            onClick={() => {
+              setEditingBrand(null);
+              setNewBrand({ name: '', description: '', country: '', logo: '', status: 'active' });
+              setShowCreateModal(true);
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            + Nueva Marca
+          </button>
+        </div>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Buscar marcas
+              </label>
+              <input
+                type="text"
+                placeholder="Nombre, descripción o país..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Estado
+              </label>
+              <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
+                <option value="">Todos</option>
+                <option value="active">Activas</option>
+                <option value="inactive">Inactivas</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                País
+              </label>
+              <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white">
+                <option value="">Todos los países</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="Francia">Francia</option>
+                <option value="Italia">Italia</option>
+                <option value="Alemania">Alemania</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
+              <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Marcas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{brands.length}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100 dark:bg-green-900">
+              <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Marcas Activas</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {brands.filter(b => b.status === 'active').length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+              <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Productos</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {brands.reduce((sum, brand) => sum + brand.products_count, 0)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-orange-100 dark:bg-orange-900">
+              <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Promedio Productos</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {Math.round(brands.reduce((sum, brand) => sum + brand.products_count, 0) / brands.length)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Brands Grid */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Marcas ({filteredBrands.length})
+          </h2>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentBrands.map((brand) => (
+              <div key={brand.id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center overflow-hidden">
+                      {brand.logo ? (
+                        <img
+                          src={brand.logo}
+                          alt={`${brand.name} logo`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                              `;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{brand.name}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{brand.country}</p>
+                    </div>
+                  </div>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    brand.status === 'active'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    {brand.status === 'active' ? 'Activa' : 'Inactiva'}
+                  </span>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{brand.description}</p>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-sm">
+                    <span className="font-medium text-gray-900 dark:text-white">{brand.products_count}</span>
+                    <span className="text-gray-500 dark:text-gray-400"> productos</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Creada: {new Date(brand.created_at).toLocaleDateString('es-ES')}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditBrand(brand)}
+                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 text-sm"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => toggleStatus(brand.id)}
+                      className="text-purple-600 hover:text-purple-900 dark:text-purple-400 text-sm"
+                    >
+                      {brand.status === 'active' ? 'Desactivar' : 'Activar'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBrand(brand.id)}
+                      className="text-red-600 hover:text-red-900 dark:text-red-400 text-sm"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, filteredBrands.length)} de {filteredBrands.length} marcas
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Anterior
+            </button>
+            <span className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Create/Edit Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg mx-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              {editingBrand ? 'Editar Marca' : 'Nueva Marca'}
+            </h2>
+            <form onSubmit={editingBrand ? handleUpdateBrand : handleCreateBrand} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Nombre de la marca
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.name}
+                  onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  País de origen
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBrand.country}
+                  onChange={(e) => setNewBrand({ ...newBrand, country: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Descripción
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={newBrand.description}
+                  onChange={(e) => setNewBrand({ ...newBrand, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  URL del logo (opcional)
+                </label>
+                <input
+                  type="url"
+                  value={newBrand.logo}
+                  onChange={(e) => setNewBrand({ ...newBrand, logo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Estado
+                </label>
+                <select
+                  value={newBrand.status}
+                  onChange={(e) => setNewBrand({ ...newBrand, status: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="active">Activa</option>
+                  <option value="inactive">Inactiva</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setEditingBrand(null);
+                    setNewBrand({ name: '', description: '', country: '', logo: '', status: 'active' });
+                  }}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  {editingBrand ? 'Actualizar' : 'Crear'} Marca
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

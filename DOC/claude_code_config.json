@@ -1,0 +1,34 @@
+{
+    "mcpServers": {
+      "n8n-mcp": {
+        "command": "npx",
+        "args": ["n8n-mcp"]
+      },
+      "ssh-production": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-ssh",
+          "ssh://root@217.79.189.223:22"
+        ],
+        "env": {
+          "SSH_PRIVATE_KEY_PATH": "/home/galo/.ssh/id_rsa"
+        }
+      },
+      "puppeteer-browser": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-puppeteer"
+        ]
+      },
+    "web-fetch": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-fetch"
+        ]
+      }
+    }
+  }
+  

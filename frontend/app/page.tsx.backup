@@ -1,0 +1,343 @@
+import { ClubDeOfertasProduct } from '../types';
+import { productsApi, convertToClubDeOfertasProduct } from '../lib/products-api';
+
+// Function to get products from API with pagination and search
+async function getProducts(page: number = 1, limit: number = 24, searchQuery?: string): Promise<{ products: ClubDeOfertasProduct[], total: number }> {
+  try {
+    console.log(`Loading products from API for page ${page}${searchQuery ? ` with search: "${searchQuery}"` : ''}...`);
+
+    let apiResponse;
+
+    if (searchQuery && searchQuery.trim()) {
+      // Use search API endpoint
+      apiResponse = await productsApi.searchProducts(searchQuery.trim(), {
+        page,
+        limit,
+        sortBy: 'name',
+        sortOrder: 'asc'
+      });
+      console.log(`Found ${apiResponse.pagination.total} products matching "${searchQuery}"`);
+    } else {
+      // Use regular products API endpoint
+      apiResponse = await productsApi.getProducts({
+        page,
+        limit,
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      });
+    }
+
+    // Convert API products to ClubDeOfertasProduct format
+    const products = apiResponse.products.map(convertToClubDeOfertasProduct);
+
+    console.log(`Returning ${products.length} products from API`);
+    return {
+      products,
+      total: apiResponse.pagination.total
+    };
+
+  } catch (error) {
+    console.error('Error loading products from API:', error);
+    // Return empty result on error
+    return { products: [], total: 0 };
+  }
+}
+
+import ProductCard from '../components/ProductCard';
+import Carousel from '../components/Carousel';
+
+// Main Page Component
+export default async function Home({ searchParams }: { searchParams: { page?: string, search?: string } }) {
+  console.log('Home component rendering...');
+  
+  // Get page and search from search params or defaults
+  const page = parseInt(searchParams.page || '1', 10);
+  const searchQuery = searchParams.search || '';
+  const limit = 24; // Products per page
+  
+  try {
+    // Fetch products data with pagination and search
+    const { products, total } = await getProducts(page, limit, searchQuery);
+    
+    // Calculate pagination values
+    const totalPages = Math.ceil(total / limit);
+    
+    // Extract unique categories from current page products
+    const categories = Array.from(new Set(products.map(product => product.category)));
+    
+    console.log(`Rendering page with ${products.length} products`);
+
+    // Build query string for pagination links
+    const buildSearchUrl = (pageNum: number) => {
+      const params = new URLSearchParams();
+      if (pageNum > 1) params.set('page', pageNum.toString());
+      if (searchQuery) params.set('search', searchQuery);
+      return '/' + (params.toString() ? `?${params.toString()}` : '');
+    };
+
+    return (
+      <div className="min-h-screen bg-gray-50 font-sans">
+        <main>
+          {/* Hero Section - Hide when searching */}
+          {!searchQuery && (
+            <>
+              <section className="relative bg-gradient-to-r from-emerald-400 to-emerald-600 py-10 md:py-14">
+                <div className="absolute inset-0 bg-black opacity-20"></div>
+                <div className="container mx-auto px-4 relative z-10 text-center">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Descubre Tu Estilo</h1>
+                  <p className="text-xl text-white mb-8 max-w-2xl mx-auto">Nuevas llegadas, Precios Imbatibles</p>
+                  <a 
+                    href="#productos" 
+                    className="inline-block bg-white text-emerald-600 font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
+                  >
+                    Comprar Ahora
+                  </a>
+                </div>
+              </section>
+
+              {/* Carousel Section */}
+              <section className="container mx-auto px-4 py-12">
+                <Carousel />
+              </section>
+
+              {/* Category Filters */}
+              <section className="container mx-auto px-4 py-10">
+                <h2 className="text-2xl font-bold text-center mb-8">Comprar por Categoría</h2>
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-8 rounded-2xl shadow-lg border border-emerald-200">
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <a 
+                      href="/?search=Apple" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Apple
+                    </a>
+                    <a 
+                      href="/?search=Bebidas" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Bebidas
+                    </a>
+                    <a 
+                      href="/?search=Beleza e Perfumaria" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Beleza e Perfumaria
+                    </a>
+                    <a 
+                      href="/?search=Brinquedos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Brinquedos
+                    </a>
+                    <a 
+                      href="/?search=Casa" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Casa
+                    </a>
+                    <a 
+                      href="/?search=Cozinha" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Cozinha
+                    </a>
+                    <a 
+                      href="/?search=Eletrônicos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Eletrônicos
+                    </a>
+                    <a 
+                      href="/?search=Informática" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Informática
+                    </a>
+                    <a 
+                      href="/?search=Perfumes Femeninos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Perfumes Femeninos
+                    </a>
+                    <a 
+                      href="/?search=Perfumes Masculinos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Perfumes Masculinos
+                    </a>
+                    <a 
+                      href="/?search=Perfumes Árabes Femeninos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Perfumes Árabes Femeninos
+                    </a>
+                    <a 
+                      href="/?search=Perfumes Árabes Masculinos" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Perfumes Árabes Masculinos
+                    </a>
+                    <a 
+                      href="/?search=Perfumes Masculinos Diseñador" 
+                      className="px-5 py-3 bg-white border-2 border-emerald-200 rounded-xl text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-md transition-all duration-300 font-medium shadow-sm hover:scale-105"
+                    >
+                      Perfumes Masculinos Diseñador
+                    </a>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* Products Grid */}
+          <section id="productos" className="container mx-auto px-4 py-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">
+                  {searchQuery ? `Resultados para "${searchQuery}"` : 'Productos Destacados'}
+                </h2>
+                {searchQuery && (
+                  <a 
+                    href="/" 
+                    className="inline-block mt-2 text-emerald-600 hover:text-emerald-800 font-medium"
+                  >
+                    ← Volver a todos los productos
+                  </a>
+                )}
+              </div>
+              <p className="text-gray-600">Total: {total.toLocaleString()} productos</p>
+            </div>
+            
+            {products.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-xl text-gray-500">
+                  {searchQuery ? `No se encontraron productos para "${searchQuery}"` : 'No se encontraron productos'}
+                </p>
+                {searchQuery && (
+                  <p className="text-gray-400 mt-2">
+                    Prueba con términos de búsqueda diferentes
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-12">
+                <div className="flex space-x-2 items-center">
+                  {/* INICIO Button */}
+                  {page > 1 && (
+                    <a 
+                      href={buildSearchUrl(1)} 
+                      className="px-4 py-2 bg-emerald-600 text-white border border-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-semibold"
+                    >
+                      INICIO
+                    </a>
+                  )}
+                  
+                  {/* Previous Button */}
+                  {page > 1 && (
+                    <a 
+                      href={buildSearchUrl(page - 1)} 
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      Anterior
+                    </a>
+                  )}
+                  
+                  {/* Page Numbers - Dynamic range calculation */}
+                  {(() => {
+                    let startPage: number = 1;
+                    let endPage: number = 1;
+                    const maxDisplayPages = 5; // Maximum page numbers to display
+                    
+                    if (totalPages <= maxDisplayPages) {
+                      startPage = 1;
+                      endPage = totalPages;
+                    } else {
+                      const halfDisplay = Math.floor(maxDisplayPages / 2);
+                      
+                      if (page <= halfDisplay) {
+                        startPage = 1;
+                        endPage = maxDisplayPages;
+                      } else if (page > totalPages - halfDisplay) {
+                        startPage = totalPages - maxDisplayPages + 1;
+                        endPage = totalPages;
+                      } else {
+                        startPage = page - halfDisplay;
+                        endPage = page + halfDisplay;
+                      }
+                    }
+                    
+                    return [...Array(endPage - startPage + 1)].map((_, index) => {
+                      const pageNum = startPage + index;
+                      
+                      return (
+                        <a
+                          key={pageNum}
+                          href={buildSearchUrl(pageNum)}
+                          className={`px-4 py-2 border rounded-lg transition-colors duration-200 ${
+                            pageNum === page
+                              ? 'bg-emerald-500 text-white border-emerald-500'
+                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </a>
+                      );
+                    });
+                  })()}
+                  
+                  {/* Next Button */}
+                  {page < totalPages && (
+                    <a 
+                      href={buildSearchUrl(page + 1)} 
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      Siguiente
+                    </a>
+                  )}
+                  
+                  {/* FINAL Button */}
+                  {page < totalPages && (
+                    <a 
+                      href={buildSearchUrl(totalPages)} 
+                      className="px-4 py-2 bg-emerald-600 text-white border border-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-semibold"
+                    >
+                      FINAL
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+    );
+    
+  } catch (error) {
+    console.error('Error in Home component:', error);
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Error Loading Products</h1>
+          <p className="text-red-500 mb-4">
+            {error instanceof Error ? error.message : 'Unknown error occurred'}
+          </p>
+          <a 
+            href="/" 
+            className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-200"
+          >
+            Try Again
+          </a>
+        </div>
+      </div>
+    );
+  }
+}

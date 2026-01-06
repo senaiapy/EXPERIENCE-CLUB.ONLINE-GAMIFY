@@ -1,0 +1,12 @@
+node_modules
+dist
+.env*
+.git
+.gitignore
+README.md
+Dockerfile*
+docker-compose*
+postgres
+*.log
+coverage
+.nyc_output

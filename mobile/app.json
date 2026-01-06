@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "Experience Club",
+    "slug": "experienceclub",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "experienceclub",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#D17842"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.experienceclub",
+      "buildNumber": "1.0.1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Experience Club to access your camera to upload product photos.",
+        "NSPhotoLibraryUsageDescription": "Allow Experience Club to access your photo library to upload product photos."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#D17842"
+      },
+      "package": "com.experienceclub",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Poppins-Black.ttf",
+            "./src/assets/fonts/Poppins-Bold.ttf",
+            "./src/assets/fonts/Poppins-ExtraBold.ttf",
+            "./src/assets/fonts/Poppins-ExtraLight.ttf",
+            "./src/assets/fonts/Poppins-Light.ttf",
+            "./src/assets/fonts/Poppins-Medium.ttf",
+            "./src/assets/fonts/Poppins-Regular.ttf",
+            "./src/assets/fonts/Poppins-SemiBold.ttf",
+            "./src/assets/fonts/Poppins-Thin.ttf"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "762f480f-9c15-44b5-99a6-e228c430a71c"
+      }
+    },
+    "owner": "senaiapy"
+  }
+}

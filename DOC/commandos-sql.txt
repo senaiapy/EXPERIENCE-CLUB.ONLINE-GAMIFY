@@ -1,0 +1,48 @@
+git config pull.rebase false
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT id,
+      name, email, phone, created_at FROM users WHERE email = 'qa.test@enviosya.com';")
+  ⎿  id |     name     |        email         |     phone      |       created_at      
+
+    ----+--------------+----------------------+----------------+-----------------------
+    … +4 lines (ctrl+r to expand)
+
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT id,
+      user_id, total_rides, rating, created_at FROM riders WHERE user_id = 6;")
+  ⎿   id | user_id | total_rides | rating |       created_at        
+     ----+---------+-------------+--------+-------------------------
+       4 |       6 |           0 |   0.00 | 2025-08-21 13:34:17.491
+     … +1 line (ctrl+r to expand)
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT id,
+      name, description, base_fare FROM vehicle_types WHERE id <= 5;")
+  ⎿   id |     name      |        description        | base_fare 
+     ----+---------------+---------------------------+-----------
+       1 | Economy       | Standard 4-door sedan     |      5.00
+     … +5 lines (ctrl+r to expand)
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT
+      COUNT(*) as total_rides FROM rides;")
+  ⎿   total_rides                
+     -------------
+     4
+     … +1 line (ctrl+r to expand)
+
+● Great! There are already some rides in the system. Let me check a few more
+  statistics:
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT
+      COUNT(*) as total_users, COUNT(CASE WHEN created_at >= CURRENT_DATE THEN 1 END)
+      as new…)
+  ⎿   total_users | new_today    
+     -------------+-----------
+               10 |        10
+     … +1 line (ctrl+r to expand)
+
+● Bash(docker exec enviosya_postgres_dev psql -U enviosya -d enviosya -c "SELECT
+      COUNT(*) as total_drivers FROM drivers;")
+  ⎿   total_drivers              
+     ---------------
+     3
+     … +1 line (ctrl+r to expand)

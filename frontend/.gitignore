@@ -1,0 +1,8 @@
+*.zip
+node_modules/*
+.next/*
+.env
+.env.prod
+.env.deploy
+
+

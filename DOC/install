@@ -1,0 +1,47 @@
+docker-compose down
+
+find . -name "node_modules" -type d -exec rm -rf {} +
+
+find . -name ".next" -type d -exec rm -rf {} +
+
+sudo 
+find . -name "dist" -type d -exec rm -rf {} +
+
+npm install
+cd typescript/backend && npm install
+cd typescript/frontend && npm install
+cd typescript/admin && npm install
+
+npx prisma generate
+npm run build
+cd ../.. && docker-compose up --build -d
+
+docker-compose exec -T backend npx prisma migrate status
+docker-compose exec -T backend npx prisma migrate deploy
+docker-compose exec -T backend npm run seed:admin
+npm run populate:from-php
+docker-compose exec -T backend npm run migrate:images
+
+//-----------------------------------------------------
+#if docker compose running, stop this
+docker-compose down
+rm -rf node_modules && rm -rf typescript/backend/node_modules && rm -rf typescript/frontend/node_modules && rm -rf typescript/admin/node_modules
+
+ rm -rf typescript/frontend/.next && rm -rf typescript/admin/.next
+
+sudo rm -rf typescript/backend/dist 
+
+#if have docker container of admin frontend and backend erase all images and volumes
+# docker system prune -a -f ====note use in server !!!!!
+# docker volume prune -f ====note use in server !!!!!
+
+npm install
+cd ../frontend && npm install
+cd ../backend && npm install
+cd ../admin && npm install  
+
+docker-compose build
+docker-compose up -d
+docker-compose exec -T backend npx prisma migrate dev --name initial-setup
+docker-compose exec -T backend npm run seed:admin
+docker-compose exec -T backend npm run migrate:images

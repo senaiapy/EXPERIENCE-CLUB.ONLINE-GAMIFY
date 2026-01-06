@@ -1,0 +1,157 @@
+{
+  "name": "SPORTCENTER_ToolsGetProducts",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return { \n'response':JSON.stringify($input.all().map(x =>x.json))\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        64
+      ],
+      "id": "f2590468-f4c3-42a7-af70-80286729f164",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        432,
+        80
+      ],
+      "id": "26199189-6eee-4dd7-a1f1-4dd64aaebddb",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction convertToDirectDownload(url) {\n    // Verifica se a URL pertence ao domínio do Google Drive\n    if (!url.includes(\"drive.google.com\")) {\n        return url; // Se não for do Google Drive, retorna a URL original\n    }\n\n    // Tenta extrair o file ID da URL usando regex\n    const match = url.match(/https:\\/\\/drive\\.google\\.com\\/file\\/d\\/([^/]+)\\/view/);\n    if (match && match[1]) {\n        const fileId = match[1];\n        return `https://drive.google.com/uc?id=${fileId}&export=download`;\n    } else {\n        throw new Error(\"URL do Google Drive inválida. Certifique-se de que está no formato correto.\");\n    }\n}\n\nfor (const item of $input.all()) {\n  // Modifica o campo Link_Book, se existir\n  if (item.json.foto) {\n    //const originalLinkBook = convertToDirectDownload(item.json.foto);\n    const originalLinkBook = item.json.foto;\n    // Adiciona o argumento ao final da URL, garantindo o separador correto\n    item.json.foto = originalLinkBook.includes('?') \n      ? `${originalLinkBook}&tipo=image` \n      : `${originalLinkBook}?tipo=image`;\n  }\n\n  // Modifica o campo Link_Video, se existir\n  if (item.json.video) {\n    const originalLinkVideo = convertToDirectDownload(item.json.video);\n\n    // Adiciona o argumento ao final da URL, garantindo o separador correto\n    item.json.video = originalLinkVideo.includes('?') \n      ? `${originalLinkVideo}&tipo=video` \n      : `${originalLinkVideo}?tipo=video`;\n  }\n}\n\nreturn $input.all();\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        192
+      ],
+      "id": "295a3c5c-0245-4f02-8fa8-fa6abcfc8ac4",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "products_sportcenter",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "lt",
+              "keyValue": "600"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        32,
+        272
+      ],
+      "id": "2faa3fca-0cf9-400b-a779-25d0a725fac8",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KG8g1bIogD51xhXX",
+          "name": "Supabase YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "search"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4c4578b7-bba3-4651-9645-f9e2dd227c10",
+      "name": "Start"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a921eda-eec5-4abf-9068-d59ffcf88d87",
+  "meta": {
+    "instanceId": "238372076f924a1386be38ddd97552ade0a2d61ff3bd5b6fb673c3926bf28399"
+  },
+  "id": "T7zYkCHZXihGa48J",
+  "tags": []
+}

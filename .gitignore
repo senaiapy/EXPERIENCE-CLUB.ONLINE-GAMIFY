@@ -1,0 +1,10 @@
+node_modules/
+.claude
+.env
+.env.dev
+.env.prod
+.env.deploy
+
+*.zip
+postgres/
+package-lock.json

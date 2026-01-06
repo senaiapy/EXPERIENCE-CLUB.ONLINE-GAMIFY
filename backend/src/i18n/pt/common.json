@@ -1,0 +1,22 @@
+{
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "email": "Deve ser um email válido",
+    "minLength": "Deve ter pelo menos {length} caracteres",
+    "maxLength": "Não pode ter mais de {length} caracteres"
+  },
+  "auth": {
+    "userExists": "Já existe um usuário com este email",
+    "invalidCredentials": "Credenciais inválidas",
+    "userNotFound": "Usuário não encontrado",
+    "currentPasswordRequired": "A senha atual é necessária para alterar a senha",
+    "currentPasswordIncorrect": "A senha atual está incorreta",
+    "emailInUse": "O email já está em uso"
+  },
+  "errors": {
+    "serverError": "Erro interno do servidor",
+    "notFound": "Recurso não encontrado",
+    "unauthorized": "Não autorizado",
+    "forbidden": "Proibido"
+  }
+}

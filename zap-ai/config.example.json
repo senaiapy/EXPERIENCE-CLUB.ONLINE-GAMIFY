@@ -1,0 +1,78 @@
+{
+  "n8n": {
+    "version": "1.114.0",
+    "webhookUrl": "http://localhost:5678/webhook/chat",
+    "basicAuth": {
+      "enabled": true,
+      "user": "admin",
+      "password": "admin123"
+    },
+    "executionTimeout": 30000
+  },
+  "database": {
+    "host": "localhost",
+    "port": 15432,
+    "database": "clubdeofertas",
+    "user": "clubdeofertas",
+    "password": "clubdeofertas123",
+    "ssl": false,
+    "poolSize": 10
+  },
+  "openai": {
+    "apiKey": "YOUR_OPENAI_API_KEY",
+    "model": "gpt-3.5-turbo",
+    "temperature": 0.7,
+    "maxTokens": 500,
+    "systemPrompt": "Eres un asistente virtual amigable de Experience Club, una tienda de perfumes y productos de belleza en Paraguay. Responde en español con emojis apropiados. Sé servicial, profesional y entusiasta. Si no sabes algo, ofrece conectar con un asesor humano."
+  },
+  "chatbot": {
+    "welcomeMessage": "¡Hola! 👋 Bienvenido a Experience Club. ¿En qué podemos ayudarte hoy?",
+    "errorMessage": "Lo sentimos, estamos experimentando problemas técnicos. Por favor, intenta nuevamente en unos momentos.",
+    "sessionTimeout": 1800000,
+    "maxConversationHistory": 10
+  },
+  "intents": {
+    "greeting": {
+      "keywords": ["hola", "ayuda", "info", "buenos dias", "buenas tardes"],
+      "response": "¡Hola! 👋 Bienvenido a Experience Club. Somos tu tienda de perfumes y productos de belleza en Paraguay.",
+      "suggestions": ["Ver productos", "Estado de mi pedido", "Información de envío", "Hablar con un asesor"]
+    },
+    "pricing": {
+      "keywords": ["precio", "costo", "cuanto", "valor"],
+      "response": "💰 **Información de Precios**\\n\\nTenemos una amplia variedad de productos con precios competitivos en Guaraníes (₲).",
+      "suggestions": ["Ver catálogo completo", "Ofertas especiales", "Métodos de pago"]
+    },
+    "shipping": {
+      "keywords": ["envio", "entrega", "envío", "delivery"],
+      "response": "🚚 **Información de Envío**\\n\\nOfrecemos envío a todo Paraguay. Envío GRATIS en compras mayores a ₲730.000",
+      "suggestions": ["Ver política de envío", "Sucursales", "Hablar con asesor"]
+    },
+    "order_status": {
+      "keywords": ["pedido", "orden", "compra", "tracking"],
+      "response": "📦 **Estado de Pedido**\\n\\nPara consultar el estado de tu pedido, puedes iniciar sesión en tu cuenta o proporcionar tu email y número de pedido.",
+      "suggestions": ["Ver mis pedidos", "Rastrear envío", "Contactar soporte"]
+    },
+    "product_inquiry": {
+      "keywords": ["producto", "perfume", "marca", "buscar", "catalogo"],
+      "response": "🛍️ **Productos**\\n\\nTenemos más de 11,000 productos de 579 marcas diferentes.",
+      "suggestions": ["Ver productos", "Buscar por marca", "Categorías"]
+    }
+  },
+  "analytics": {
+    "enabled": true,
+    "trackResponseTime": true,
+    "trackUserSatisfaction": true,
+    "cleanupOldConversationsDays": 90
+  },
+  "security": {
+    "rateLimit": {
+      "enabled": true,
+      "maxRequestsPerMinute": 10,
+      "maxRequestsPerHour": 100
+    },
+    "cors": {
+      "allowedOrigins": ["http://localhost:3060", "http://localhost:3061"],
+      "allowedMethods": ["POST", "OPTIONS"]
+    }
+  }
+}

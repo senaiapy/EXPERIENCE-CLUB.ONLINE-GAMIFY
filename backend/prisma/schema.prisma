@@ -1,0 +1,501 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  name           String?
+  password       String
+  role           UserRole      @default(USER)
+  phone          String?
+  address        String?
+  city           String?
+  country        String?
+  postalCode     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // EXISTING RELATIONS
+  uploadedImages Image[]
+  orders         Order[]
+  cart           Cart?
+  wishlist       Wishlist[]
+
+  // NEW GAME FIELDS
+  coinBalance        Int       @default(50)
+  totalCoinsEarned   Int       @default(50)
+  referralCode       String?   @unique
+  onboardingComplete Boolean   @default(false)
+  gameProfilePic     String?
+  lastGameAccess     DateTime?
+
+  // NEW GAME RELATIONS
+  userTasks          UserTask[]
+  coinTransactions   CoinTransaction[]
+  referralsMade      Referral[]      @relation("ReferralsMade")
+  referralsReceived  Referral[]      @relation("ReferralsReceived")
+  dailyStreak        DailyStreak?
+}
+
+model Brand {
+  id          String               @id @default(cuid())
+  name        String               @unique
+  slug        String               @unique
+  imageUrl    String?
+  description String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  images      BrandImageRelation[]
+  products    Product[]
+}
+
+model Category {
+  id          String                  @id @default(cuid())
+  name        String                  @unique
+  slug        String                  @unique
+  description String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  images      CategoryImageRelation[]
+  products    Product[]
+}
+
+model Product {
+  id             String                 @id @default(cuid())
+  name           String
+  slug           String                 @unique
+  description    String
+  price          Float
+  stock          Int
+  brandId        String?
+  categoryId     String?
+  referenceId    String?
+  specifications String?
+  details        String?  
+  price_sale     String?  
+  stockStatus    String                @default("Agotado") 
+  stockQuantity  String?               
+  image_name     String?
+  brand_name     String?
+  tags           String[]
+  isFeatured     Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  orderItems     OrderItem[]
+  brand          Brand?                 @relation(fields: [brandId], references: [id])
+  category       Category?              @relation(fields: [categoryId], references: [id])
+  images         ProductImage[]
+  imageRelations ProductImageRelation[]
+  cartItems      CartItem[]
+  wishlistItems  Wishlist[]
+}
+
+model ProductImage {
+  id        String    @id @default(cuid())
+  filename  String
+  size      ImageSize
+  url       String
+  productId String
+  createdAt DateTime  @default(now())
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, size])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  userId          String
+  total           Float
+  subtotal        Float
+  tax             Float         @default(0)
+  shippingCost    Float         @default(0)
+  status          OrderStatus   @default(PENDING)
+  paymentMethod   PaymentMethod @default(CASH)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  shippingAddress String?
+  shippingCity    String?
+  shippingCountry String?
+  postalCode      String?
+  phone           String?
+  notes           String?
+
+  // NEW GAME FIELDS
+  coinsUsed       Int?          @default(0)
+  coinDiscount    Float?        @default(0)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+}
+
+model Image {
+  id                String                  @id @default(cuid())
+  name              String
+  description       String?
+  originalName      String
+  filename          String                  @unique
+  path              String
+  url               String
+  mimeType          String
+  size              Int
+  type              ImageType
+  imageSize         ImageSize?
+  width             Int?
+  height            Int?
+  alt               String?
+  isActive          Boolean                 @default(true)
+  sortOrder         Int?                    @default(0)
+  tags              String[]
+  metadata          Json?
+  uploadedById      String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  brandRelations    BrandImageRelation[]
+  categoryRelations CategoryImageRelation[]
+  uploadedBy        User?                   @relation(fields: [uploadedById], references: [id])
+  productRelations  ProductImageRelation[]
+
+  @@index([type])
+  @@index([imageSize])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model ProductImageRelation {
+  id        String   @id @default(cuid())
+  productId String
+  imageId   String
+  isPrimary Boolean  @default(false)
+  sortOrder Int?     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, imageId])
+}
+
+model BrandImageRelation {
+  id        String   @id @default(cuid())
+  brandId   String
+  imageId   String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, imageId])
+}
+
+model CategoryImageRelation {
+  id         String   @id @default(cuid())
+  categoryId String
+  imageId    String
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  image      Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, imageId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MANAGER
+  SUPER_ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ImageSize {
+  SMALL
+  MEDIUM
+  LARGE
+  HOME
+}
+
+enum ImageType {
+  PRODUCT
+  BANNER
+  BRAND
+  CATEGORY
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  PAYPAL
+  OTHER
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum Language {
+  ENGLISH
+  SPANISH
+  PORTUGUESE
+}
+
+model Settings {
+  id                String   @id @default(cuid())
+  // General Settings
+  language          Language @default(SPANISH)
+  siteName          String   @default("Experience Club")
+  siteDescription   String?
+  contactEmail      String?
+  contactPhone      String?
+  supportEmail      String?
+
+  // Social Media
+  facebookUrl       String?
+  instagramUrl      String?
+  whatsappNumber    String?
+
+  // Business Settings
+  taxRate           Float    @default(0)
+  currency          String   @default("PYG")
+  currencySymbol    String   @default("₲")
+  exchangeRate      Float    @default(7300) // USD to PYG
+
+  // Shipping Settings
+  freeShippingThreshold Float @default(0)
+  defaultShippingCost   Float @default(0)
+
+  // Email Settings
+  smtpHost          String?
+  smtpPort          Int?
+  smtpUser          String?
+  smtpPassword      String?
+  emailFromName     String?
+  emailFromAddress  String?
+
+  // SEO Settings
+  metaTitle         String?
+  metaDescription   String?
+  metaKeywords      String?
+
+  // Features
+  enableCart        Boolean  @default(true)
+  enableWishlist    Boolean  @default(true)
+  enableReviews     Boolean  @default(false)
+  enableCoupons     Boolean  @default(false)
+
+  // Maintenance
+  maintenanceMode   Boolean  @default(false)
+  maintenanceMessage String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ====================================
+// GAME SYSTEM MODELS (NEW)
+// ====================================
+
+model GameTask {
+  id                   String      @id @default(cuid())
+  name                 String
+  description          String
+  coinReward           Int
+  taskType             TaskType
+  delayHours           Int         @default(24)
+  orderIndex           Int
+  isActive             Boolean     @default(true)
+  verificationRequired Boolean     @default(false)
+  externalUrl          String?
+  instructions         String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  userTasks            UserTask[]
+
+  @@index([orderIndex])
+  @@index([isActive])
+}
+
+model UserTask {
+  id                String      @id @default(cuid())
+  userId            String
+  taskId            String
+  status            TaskStatus  @default(LOCKED)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  verifiedAt        DateTime?
+  nextAvailableAt   DateTime?
+  proofUrl          String?
+  verificationNotes String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task              GameTask    @relation(fields: [taskId], references: [id])
+
+  @@unique([userId, taskId])
+  @@index([userId, status])
+  @@index([status, nextAvailableAt])
+}
+
+model CoinTransaction {
+  id            String          @id @default(cuid())
+  userId        String
+  amount        Int
+  type          TransactionType
+  description   String
+  referenceId   String?
+  referenceType String?
+  balanceBefore Int
+  balanceAfter  Int
+  createdAt     DateTime        @default(now())
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+}
+
+model Referral {
+  id            String          @id @default(cuid())
+  referrerId    String
+  referredId    String
+  referralCode  String          @unique
+  status        ReferralStatus  @default(PENDING)
+  rewardClaimed Boolean         @default(false)
+  coinReward    Int             @default(0)
+  createdAt     DateTime        @default(now())
+  claimedAt     DateTime?
+  referrer      User            @relation("ReferralsMade", fields: [referrerId], references: [id])
+  referred      User            @relation("ReferralsReceived", fields: [referredId], references: [id])
+
+  @@unique([referrerId, referredId])
+  @@index([referralCode])
+  @@index([referrerId, status])
+}
+
+model DailyStreak {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastCheckIn   DateTime?
+  totalCheckIns Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([currentStreak])
+}
+
+// ====================================
+// GAME ENUMS (NEW)
+// ====================================
+
+enum TaskType {
+  REGISTRATION
+  APP_INSTALL
+  SOCIAL_POST
+  REFERRAL
+  SELFIE
+  SURVEY
+  AFFILIATE_ACTION
+  DAILY_LOGIN
+  WATCH_VIDEO
+  SHARE_LINK
+  EXTERNAL_ACTION
+}
+
+enum TaskStatus {
+  LOCKED
+  AVAILABLE
+  IN_PROGRESS
+  PENDING_VERIFY
+  COMPLETED
+  EXPIRED
+}
+
+enum TransactionType {
+  TASK_REWARD
+  REFERRAL_BONUS
+  ADMIN_BONUS
+  ORDER_REDEMPTION
+  REFUND
+  PENALTY
+  PROMOTION
+  PURCHASE
+}
+
+enum ReferralStatus {
+  PENDING
+  REGISTERED
+  COMPLETED_FIRST_TASK
+  REWARD_GIVEN
+}

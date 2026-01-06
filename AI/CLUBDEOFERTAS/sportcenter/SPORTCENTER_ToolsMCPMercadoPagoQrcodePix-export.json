@@ -1,0 +1,1187 @@
+{
+  "name": "SPORTCENTER_ToolsMCPMercadoPagoQrcodePix-export",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea474508-6086-4086-a078-5695c3c49cd7",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "d77127ca-5a6d-4369-bf87-fbac4907c74a",
+              "name": "ACCESS_TOKEN",
+              "value": "--SUA-KEY-AQUI--",
+              "type": "string"
+            },
+            {
+              "id": "74cea5e7-50bb-45d0-b735-ff8fe50a61bb",
+              "name": "PUBLIC_KEY",
+              "value": "--SUA-KEY-AQUI--",
+              "type": "string"
+            },
+            {
+              "id": "69917125-0886-436b-908d-720851c5228a",
+              "name": "app_name",
+              "value": "ecommerce",
+              "type": "string"
+            },
+            {
+              "id": "be1eff98-8144-4289-88d0-6bb13b3cc91e",
+              "name": "expiration",
+              "value": "={{ $now.plus(7,'days').toUTC() }}",
+              "type": "string"
+            },
+            {
+              "id": "7deb3016-d862-4cf5-bab5-e67f928663e5",
+              "name": "notification_url",
+              "value": "--SEU-SITE-AQUI--",
+              "type": "string"
+            },
+            {
+              "id": "3887d153-240d-49c3-be20-84d97cdf611e",
+              "name": "created_at",
+              "value": "={{ $now.toUTC() }}",
+              "type": "string"
+            },
+            {
+              "id": "cf32ec27-9457-421f-bd9c-d0af002d9e60",
+              "name": "value",
+              "value": "={{ $json.value }}",
+              "type": "string"
+            },
+            {
+              "id": "9147f90b-2013-42c1-8797-284451009332",
+              "name": "invoice",
+              "value": "={{ $json.invoice }}",
+              "type": "string"
+            },
+            {
+              "id": "c566af33-a696-41b6-88ae-07f8dbdc7e9f",
+              "name": "ACCESS_TOKEN_API",
+              "value": "FyquHRsMeg8E+T7Kd3pDeofESfz7N5fTi5WYtH78U=",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d2dfc56d-49fb-45b8-9ecb-13e18e65b7b7",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "customers_sportcenter",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "keyValue": "={{ $json.phone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "1c6d4c75-142d-48fe-8d79-6ec8b0d77ed7",
+      "name": "get_customer",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "KG8g1bIogD51xhXX",
+          "name": "Supabase YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1472,
+        528
+      ],
+      "id": "56610ddf-24cb-40ac-85f9-6a34bd2c8739",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "return { \n'webContentLink':'',\n\"payload\": '',\n\"error\":  $('Merge').last().json.message\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        912
+      ],
+      "id": "37b60044-46d3-4101-b7b2-43961ed4bd3c",
+      "name": "ResponseError"
+    },
+    {
+      "parameters": {
+        "jsCode": "return { \n'image_qrcode':$('SetResponse').last().json?.image_qrcode+\"&tipo=image\",\n\"copia_cola\":  $('SetResponse').last().json?.copia_cola\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        880
+      ],
+      "id": "f3dcd0f8-bfc8-422a-b77b-e10aed60d5a6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Config').item.json.phone }}-qrcode.png",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ASjJvKZXJFlcQrGKaFSyO2b_DQ4TftFV",
+          "mode": "list",
+          "cachedResultName": "upload",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1ASjJvKZXJFlcQrGKaFSyO2b_DQ4TftFV"
+        },
+        "options": {
+          "useContentAsIndexableText": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2000,
+        880
+      ],
+      "id": "45ada764-5110-49cc-bb09-2df1b929e59b",
+      "name": "Google Drive",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "kdMFd6dRHlu5pzBu",
+          "name": "Google Drive projlinux"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "qrcode_base64",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        880
+      ],
+      "id": "7c58c700-629b-4c7d-bb56-e82dd1fa5baa",
+      "name": "Convert to File",
+      "alwaysOutputData": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "568c3c79-4c79-4426-a3f7-35ea279c5c99",
+              "name": "first_name",
+              "value": "={{ $('get_customer').item.json.cliente_name.split(' ').first() }}",
+              "type": "string"
+            },
+            {
+              "id": "a342d8bc-c9af-4f52-9e96-7bb059224406",
+              "name": "last_name",
+              "value": "={{ $('get_customer').item.json.cliente_name.split(' ').last() }}",
+              "type": "string"
+            },
+            {
+              "id": "219aab30-cb4c-4647-88a2-8377ff1c921f",
+              "name": "cpf",
+              "value": "={{ $('get_customer').item.json.cpf }}",
+              "type": "string"
+            },
+            {
+              "id": "e15b19a1-c7e3-4db7-84c8-9e0a9945d410",
+              "name": "description",
+              "value": "={{ $('Config').item.json.invoice }}",
+              "type": "string"
+            },
+            {
+              "id": "933bee20-5889-4c1f-bac5-b8b063cdb5ec",
+              "name": "value",
+              "value": "={{ $('Config').item.json.value.toNumber() }}",
+              "type": "string"
+            },
+            {
+              "id": "544b3e41-7588-4baa-9524-4ae69806388c",
+              "name": "invoiceNumber",
+              "value": "={{ $('Config').item.json.phone + $today.format('x') }}",
+              "type": "string"
+            },
+            {
+              "id": "35e04d45-e5ed-422b-969e-4ab8783c06cd",
+              "name": "phone",
+              "value": "={{ $('Config').item.json.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "90260e42-016e-4399-a43b-5dc2e48bce12",
+      "name": "CacheData"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c2640eb9-8ccc-4e1a-93d4-cb322475da37",
+              "name": "X-Idempotency-Key",
+              "value": "={{$now.format('x')+$('CacheData').item.json.phone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        0
+      ],
+      "id": "4ddef526-0cbd-4a33-ba5d-dfcc7289ba68",
+      "name": "MakeID"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c1e4384-49e9-4ece-808d-b096176176d2",
+              "name": "copia_cola",
+              "value": "={{ $('Gerar_CHECKOUT').item.json.point_of_interaction.transaction_data.qr_code }}",
+              "type": "string"
+            },
+            {
+              "id": "5c721b15-73f8-442b-ab54-33911507f950",
+              "name": "image_qrcode",
+              "value": "={{ $json.webContentLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        880
+      ],
+      "id": "6436958b-b491-4287-802b-9c05c18e2c3a",
+      "name": "SetResponse",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "64fdf1e4-047e-4c07-99a8-3a6a709c926e",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        224
+      ],
+      "id": "299b32e8-caaf-4f88-b7de-4192d5db67ff",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4373703-63d9-433c-baff-3911c4ee98ba",
+              "name": "message",
+              "value": "={{ $('Gerar_CHECKOUT').item.json.error }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        240
+      ],
+      "id": "8d9fb7b7-fd2a-43d0-9907-e79afc14e84f",
+      "name": "SetMessageQrCode"
+    },
+    {
+      "parameters": {
+        "tableId": "=purchase_sportcenter",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('Config').item.json.phone }}"
+            },
+            {
+              "fieldId": "value",
+              "fieldValue": "={{ $('Config').item.json.value }}"
+            },
+            {
+              "fieldId": "qrcode",
+              "fieldValue": "={{ $('Gerar_CHECKOUT').item.json.order.items[0].id }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $('Gerar_CHECKOUT').item.json.order.items }}"
+            },
+            {
+              "fieldId": "invoiceNumber",
+              "fieldValue": "={{ $('MakeID').last().json['X-Idempotency-Key'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        480
+      ],
+      "id": "cd1e4943-6e42-4bde-ae12-fa728dd18e9d",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KG8g1bIogD51xhXX",
+          "name": "Supabase YOENVIO.DE"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7139412c-aead-42dd-90a9-32bddcbf4c71",
+              "name": "qrcode_base64",
+              "value": "={{ $('Gerar_CHECKOUT').last().json.point_of_interaction.transaction_data.qr_code_base64 }}",
+              "type": "string"
+            },
+            {
+              "id": "7f437a3d-7cab-4eb1-922f-e8c34cea7670",
+              "name": "copia_cola",
+              "value": "={{ $('Gerar_CHECKOUT').last().json.point_of_interaction.transaction_data.qr_code }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1744,
+        480
+      ],
+      "id": "4e30f632-1b93-45e0-8799-6689ac57b46c",
+      "name": "ConfigFile"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2144,
+        704
+      ],
+      "id": "ef4a60e7-a401-4e23-b1d7-bfb72b6824a3",
+      "name": "PermissionGoogleDrive",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "kdMFd6dRHlu5pzBu",
+          "name": "Google Drive projlinux"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "phone"
+            },
+            {
+              "name": "invoice"
+            },
+            {
+              "name": "value",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "498b7926-7d40-49a5-ba7e-ef14c8f76cdb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c8ed78d1-453e-483c-a3c9-10638e3a660d",
+                    "leftValue": "={{ $('get_customer').item.json.id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "number",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.cliente_name}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    },
+                    "id": "9229af18-ce30-4642-b59a-36dea9ab58ad"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a50b53f8-330d-463c-b456-0326ceade757",
+                    "leftValue": "={{ $json.email }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2e8e3288-5a26-4709-8919-ad0d371c8ca8",
+                    "leftValue": "={{ $json.complemento }}",
+                    "rightValue": "=",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        368
+      ],
+      "id": "c49ff3b8-84ed-4e21-a457-0cc83849c90e",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4373703-63d9-433c-baff-3911c4ee98ba",
+              "name": "message",
+              "value": "Telefone do cliente não localizado",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        288
+      ],
+      "id": "50614fdb-b25e-4f1d-a0bb-bedd9e19a5ad",
+      "name": "SetMessagePhone"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4373703-63d9-433c-baff-3911c4ee98ba",
+              "name": "message",
+              "value": "CPF do cliente não cadastrado",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        464
+      ],
+      "id": "ac66d194-e4a5-4f10-b8a5-062464eaffc2",
+      "name": "SetMessageCPF"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4373703-63d9-433c-baff-3911c4ee98ba",
+              "name": "message",
+              "value": "E-mail do cliente não cadastrado",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        624
+      ],
+      "id": "4cd21d50-faeb-4b7b-b204-1e4cb2b574ae",
+      "name": "SetMessageEmail"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4373703-63d9-433c-baff-3911c4ee98ba",
+              "name": "message",
+              "value": "CEP do cliente não cadastrado",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        800
+      ],
+      "id": "c5add6b1-5a4b-4347-aa76-8975f5361d04",
+      "name": "SetMessageCEP"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/v1/payments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.ACCESS_TOKEN }}"
+            },
+            {
+              "name": "X-Idempotency-Key",
+              "value": "={{$now.format('x')+$('CacheData').item.json.cpf }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"transaction_amount\": {{ $('CacheData').item.json.value }},\n    \"date_of_expiration\": \"2025-12-25T19:30:00.000-03:00\",\n    \"payment_method_id\": \"pix\",\n    \"external_reference\": \"{{ $('CacheData').item.json.invoiceNumber }}\",\n    \"notification_url\": \"{{ $('Config').item.json?.notification_url }}\",\n    \"metadata\": {\n        \"order_number\": \"order_1724857044\"\n    },\n    \"description\": \"{{ $('CacheData').item.json.description.replaceAll('\"','').replaceAll('\\n','') }}\",\n    \"payer\": {\n        \"first_name\": \"{{ $('CacheData').item.json.first_name }}\",\n        \"last_name\": \"{{ $('CacheData').item.json.last_name }}\",\n        \"email\": \"{{ $('CacheData').item.json.email }}\",\n        \"identification\": {\n            \"type\": \"CPF\",\n            \"number\": \"{{ $('CacheData').item.json.cpf }}\"\n        },\n        \"address\": {\n            \"zip_code\": \"{{ $('CacheData').item.json.zip_code }}\",\n            \"street_name\": \"{{ $('CacheData').item.json.street_name }}\",\n            \"street_number\": \"{{ $('CacheData').item.json.street_number }}\",\n            \"neighborhood\": \"{{ $('CacheData').item.json.bairro }}\",\n            \"city\": \"{{ $('CacheData').item.json.city }}\",\n            \"federal_unit\": \"{{ $('CacheData').item.json.uf }}\"\n        }\n    },\n    \"additional_info\": {\n        \"items\": [\n            {\n                \"id\": \"{{ $('CacheData').item.json.invoiceNumber }}\",\n                \"title\": \"{{ $('Config').item.json.invoice.slice(0,30) }}\",\n                \"description\":\"{{ $('CacheData').item.json.description.replaceAll('\"','').replaceAll('\\n','') }}\",\n                \"picture_url\": null,\n                \"category_id\": \"Product\",\n                \"quantity\": 1,\n                \"unit_price\": {{ $('Config').item.json.value }},\n                \"event_date\": \"{{ $('Config').item.json.created_at }}\"\n            }\n        ],\n        \"payer\": {\n            \"first_name\": \"{{ $('CacheData').item.json.first_name }}\",\n            \"last_name\": \"{{ $('CacheData').item.json.last_name }}\",\n            \"is_prime_user\": \"1\",\n            \"is_first_purchase_online\": \"1\",\n            \"last_purchase\": \"2025-10-25T19:30:00.000-03:00\",\n            \"phone\": {\n                \"area_code\": \"11\",\n                \"number\": \"{{ $('Config').item.json.phone }}\"\n            },\n            \"address\": {\n                \"zip_code\": \"{{ $('CacheData').item.json.zip_code }}\",\n                \"street_name\": \"{{ $('CacheData').item.json.street_name }}\",\n                \"street_number\": \"{{ $('get_customer').item.json.street_number}}\"\n            },\n            \"registration_date\": \"2025-08-06T09:25:04.000-03:00\"\n        },\n        \"shipments\": {\n            \"express_shipment\": \"0\",\n            \"pick_up_on_seller\": \"1\",\n            \"receiver_address\": {\n                \"zip_code\": \"{{ $('CacheData').item.json.zip_code }}\",\n                \"street_name\": \"{{ $('get_customer').item.json.street_name }}\",\n                \"street_number\": \"{{ $('get_customer').item.json.street_number}}\",\n                \"floor\": \"12\",\n                \"apartment\": \"123\"\n            }\n        }\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        0
+      ],
+      "id": "41ac377f-ef7a-4495-8506-3f2dd05c0c1e",
+      "name": "Gerar_QR_CODE_MERCADO_PAGO1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return { \n\"qrcode\": $input.first().json?.qrcode,\n\"invoice\": $input.first().json?.invoice,\n\"phone\": $input.first().json?.phone,\n\"email\": $input.first().json?.email,\n\"itens\": $input.first().json?.itens,\n\"value\": $input.first().json?.value\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        480
+      ],
+      "id": "c0d8185d-75e6-4e97-90fb-7ae48d59fa49",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "tableId": "=purchase_sportcenter",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('Config').item.json.phone }}"
+            },
+            {
+              "fieldId": "value",
+              "fieldValue": "={{ $('Config').item.json.value }}"
+            },
+            {
+              "fieldId": "qrcode",
+              "fieldValue": "={{ $('Gerar_CHECKOUT').last().json.point_of_interaction.transaction_data.qr_code }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $('Gerar_CHECKOUT').last().json.description }}"
+            },
+            {
+              "fieldId": "invoiceNumber",
+              "fieldValue": "={{ $('MakeID').last().json['X-Idempotency-Key'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        304
+      ],
+      "id": "2413cba4-5879-4522-8cfd-4ce979c0c797",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "KG8g1bIogD51xhXX",
+          "name": "Supabase YOENVIO.DE"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clubdeofertas.online/api/checkout-api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer FyquHRsMeg8E+T7K9Qd3pDeofESfz7N5fTi5WYtH78U="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n   \"email\":\"chatbot@test.com\",\n  \"name\": \"{{ $('CacheData').item.json.first_name }}\",\n  \"phone\": \"{{ $('CacheData').item.json.phone }}\",\n  \"shippingCost\": {{ $('CacheData').item.json.value }},\n  \"items\": [\n    {\n      \"productId\": \"COOL WOMAN\",\n      \"price\":  {{ $('Config').item.json.value }}\n    }\n  ],\n  \"notes\": \"{{ $('CacheData').item.json.description }}{{ $('CacheData').item.json.invoiceNumber }}\"\n\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        0
+      ],
+      "id": "d4ceb2bc-ba0f-47c5-a580-bc00fa46675b",
+      "name": "Gerar_CHECKOUT",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c1e4384-49e9-4ece-808d-b096176176d2",
+              "name": "qrcode",
+              "value": "={{ $json.qrcode }}",
+              "type": "string"
+            },
+            {
+              "id": "5c721b15-73f8-442b-ab54-33911507f950",
+              "name": "value",
+              "value": "={{ $json.value }}",
+              "type": "string"
+            },
+            {
+              "id": "6b466eb6-2005-437f-ae85-c8cbd90ec039",
+              "name": "invoice",
+              "value": "={{ $json.invoiceNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "50c4d9a8-c969-476d-bf10-80e98021c283",
+              "name": "phone",
+              "value": "={{ $json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "9991762a-cc2b-4b09-88eb-dc45705463a7",
+              "name": "email",
+              "value": "={{ $('Gerar_CHECKOUT').item.json.order.user.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a3f5f616-3058-4ec2-ae4b-0b2f3717446e",
+              "name": "itens",
+              "value": "={{ $('Gerar_CHECKOUT').item.json.order.items }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2384,
+        480
+      ],
+      "id": "0921e229-ec99-4976-b044-ca7c7b987088",
+      "name": "SetResponse1",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "phone": "595993547294",
+          "invoice": "Cliente: Marcelo dos Anjos, Telefone: (0) 993-547-294. Produtos: 1x PACO RABANNE INVICTUS VICTORY ABSOLU PARFUM 100ML, 1x KIT TERRE D HERMES EDT 100ML + GEL DE DUCHA 80ML",
+          "value": "1223775"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "get_customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_customer": {
+      "main": [
+        [
+          {
+            "node": "CacheData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "ResponseError",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "PermissionGoogleDrive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SetResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CacheData": {
+      "main": [
+        [
+          {
+            "node": "MakeID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MakeID": {
+      "main": [
+        [
+          {
+            "node": "Gerar_CHECKOUT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetResponse": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "ConfigFile",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetMessageQrCode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetMessageQrCode": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "ConfigFile": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PermissionGoogleDrive": {
+      "main": [
+        [
+          {
+            "node": "SetResponse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "SetMessagePhone",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetMessageCPF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetMessageEmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SetMessageCEP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "SetMessagePhone": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetMessageCPF": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "SetMessageEmail": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "SetMessageCEP": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "SetResponse1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar_CHECKOUT": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetResponse1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "712c2df7-df00-4a8d-88c7-3b14281e32b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "238372076f924a1386be38ddd97552ade0a2d61ff3bd5b6fb673c3926bf28399"
+  },
+  "id": "UGMvB6ApT7wFLJii",
+  "tags": [
+    {
+      "updatedAt": "2025-10-09T14:04:54.663Z",
+      "createdAt": "2025-10-09T14:04:54.663Z",
+      "id": "mQimZDErbk2F6Rjo",
+      "name": "ecommerce-mcp"
+    }
+  ]
+}

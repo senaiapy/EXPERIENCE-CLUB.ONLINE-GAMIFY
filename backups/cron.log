@@ -1,0 +1,13 @@
+
+[2025-10-25 21:30:02] Starting backup process...
+[2025-10-25 21:30:02] Database: clubdeofertas
+[2025-10-25 21:30:02] Container: clubdeofertas_postgres
+[2025-10-25 21:30:02] Backup file: /www/wwwroot/experience-club.online/CLUBOFERTAS-V1.0.1/backups/clubdeofertas_backup_20251025_213001.sql.gz
+[0;32m[2025-10-25 21:30:02] SUCCESS: Backup completed successfully![0m
+[2025-10-25 21:30:02] Backup size: 200K
+[2025-10-25 21:30:02] Location: /www/wwwroot/experience-club.online/CLUBOFERTAS-V1.0.1/backups/clubdeofertas_backup_20251025_213001.sql.gz
+[2025-10-25 21:30:02] Cleaning up backups older than 14 days...
+[2025-10-25 21:30:02] Cleaning up backups older than 30 days (1 month)...
+[2025-10-25 21:30:02] No old backups to delete (all are less than 30 days old)
+[2025-10-25 21:30:02] Total backups retained: 1
+

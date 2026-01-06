@@ -1,0 +1,402 @@
+{
+  "name": "SPORTCENTER_escalar_humano",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "telefone"
+            },
+            {
+              "name": "nome"
+            },
+            {
+              "name": "ultima_mensagem"
+            },
+            {
+              "name": "id_conta"
+            },
+            {
+              "name": "id_conversa"
+            },
+            {
+              "name": "telegram_chat_id"
+            },
+            {
+              "name": "url_chatwoot"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -176,
+        160
+      ],
+      "id": "470a22c4-b273-4407-b770-2b9656c0ed5e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.telegram_chat_id }}",
+        "text": "=Assistente desabilitado para o usuário {{ $('When Executed by Another Workflow').item.json.nome || '(usuário não cadastrado)' }} ({{ $('When Executed by Another Workflow').item.json.telefone }}).\n\nÚltima mensagem:\n\n---\n\n{{ $('When Executed by Another Workflow').item.json.ultima_mensagem }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        160
+      ],
+      "id": "fcb0da53-a1b2-4a34-95fd-862677f7072d",
+      "name": "Enviar alerta",
+      "webhookId": "aa4958ef-7a58-48af-aea3-d47042c9999c",
+      "credentials": {
+        "telegramApi": {
+          "id": "vMD8XrLnOhc59ImE",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('When Executed by Another Workflow').item.json.url_chatwoot }}/api/v1/accounts/{{ $('When Executed by Another Workflow').item.json.id_conta }}/conversations/{{ $('When Executed by Another Workflow').item.json.id_conversa }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "labels",
+              "value": "={{ $json.payload.append('agente-off').unique() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        64
+      ],
+      "id": "199e7625-0695-47d0-b7b6-363689211e3c",
+      "name": "Colocar etiqueta agente-off",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatwoot.senaia.in/api/v1/accounts/{{ $json.account_id }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"color\": \"#6233D0\",\n  \"description\": \"Agente IA não responderá esse contato.\",\n  \"title\": \"agente-off\",\n  \"show_on_sidebar\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -176,
+        480
+      ],
+      "id": "257fb2ba-9356-4f49-a392-9b3ed8e20c74",
+      "name": "Criar etiqueta agente-off",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Criar etiqueta AGENTE OFF\n\nVocê pode criar a etiqueta \"agente-off\" por aqui, ou pela interface do Chatwoot.\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 340,
+        "width": 1040,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        368
+      ],
+      "id": "b1d59122-0830-4f9b-99d5-bb1c449789e4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('When Executed by Another Workflow').item.json.url_chatwoot }}/api/v1/accounts/{{ $('When Executed by Another Workflow').item.json.id_conta }}/conversations/{{ $('When Executed by Another Workflow').item.json.id_conversa }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        64
+      ],
+      "id": "8f7a95d0-42cd-4704-92fd-78d62d53f7e3",
+      "name": "Listar etiquetas da conversa",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Profile",
+        "operation": "Fetch Profile",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-chatwoot.chatWoot",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        480
+      ],
+      "id": "de8043d6-36ad-4b68-84f4-36a859bf3d7f",
+      "name": "Buscar informações da conta",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 4. Escalar humano",
+        "height": 80,
+        "width": 540,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d13d4898-3301-42ff-bc53-d0d3460108dd",
+      "name": "Sticky Note30"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chatwoot.senaia.in/api/v1/accounts/{{ $('Buscar informações da conta').item.json.account_id }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"color\": \"#A44C74\",\n  \"title\": \"testando-agente\",\n  \"show_on_sidebar\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        480
+      ],
+      "id": "ac99c23a-bc0a-47d5-8070-bea66dae456e",
+      "name": "Criar etiqueta testando-agente",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.b7g.app/api/v1/accounts/{{ $json.account_id }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"color\": \"#6233D0\",\n  \"description\": \"Agente IA esponderá esse contato.\",\n  \"title\": \"agente-on\",\n  \"show_on_sidebar\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        944,
+        480
+      ],
+      "id": "2fb9f896-7ce9-44ea-a922-76297c55bd78",
+      "name": "Criar etiqueta agente-off1",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Criar etiqueta AGENTE ON\n\nVocê pode criar a etiqueta \"agente-on\" por aqui, ou pela interface do Chatwoot.\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 340,
+        "width": 1040,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        368
+      ],
+      "id": "e51a683e-0718-4a7a-99ac-9c8e8b79688a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "resource": "Profile",
+        "operation": "Fetch Profile",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-chatwoot.chatWoot",
+      "typeVersion": 1,
+      "position": [
+        704,
+        480
+      ],
+      "id": "d4a0e2ab-6b70-4ab7-931f-e09d398a2ab2",
+      "name": "Buscar informações da conta1",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.b7g.app/api/v1/accounts/{{ $('Buscar informações da conta1').item.json.account_id }}/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "chatwootApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"color\": \"#A44C74\",\n  \"title\": \"testando-agente\",\n  \"show_on_sidebar\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        480
+      ],
+      "id": "d4bdc8fc-645c-4732-8163-6388eeaa1d97",
+      "name": "Criar etiqueta testando-agente1",
+      "credentials": {
+        "chatwootApi": {
+          "id": "Wer2PecDRCnZn7jL",
+          "name": "ChatWoot YOENVIO.DE"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Listar etiquetas da conversa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Colocar etiqueta agente-off": {
+      "main": [
+        [
+          {
+            "node": "Enviar alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar etiqueta agente-off": {
+      "main": [
+        [
+          {
+            "node": "Criar etiqueta testando-agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar etiquetas da conversa": {
+      "main": [
+        [
+          {
+            "node": "Colocar etiqueta agente-off",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar informações da conta": {
+      "main": [
+        [
+          {
+            "node": "Criar etiqueta agente-off",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar etiqueta agente-off1": {
+      "main": [
+        [
+          {
+            "node": "Criar etiqueta testando-agente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar informações da conta1": {
+      "main": [
+        [
+          {
+            "node": "Criar etiqueta agente-off1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fd735bf2-39db-4c40-b8ae-107cc3c71b92",
+  "meta": {
+    "instanceId": "238372076f924a1386be38ddd97552ade0a2d61ff3bd5b6fb673c3926bf28399"
+  },
+  "id": "sLZlk07jPqfnAXMi",
+  "tags": []
+}

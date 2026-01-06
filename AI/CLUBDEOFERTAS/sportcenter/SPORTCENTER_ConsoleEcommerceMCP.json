@@ -1,0 +1,368 @@
+{
+  "name": "SPORTCENTER_ConsoleEcommerceMCP",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "5233fc43-c6db-4023-927c-17286e6d5344",
+      "name": "When chat message received",
+      "webhookId": "e9dcfb5a-0f0d-412a-a64a-01421776a875"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        304
+      ],
+      "id": "344e250c-f01a-4a39-89b3-12bbbb14b8e3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "czfsa36YSvhqfxx1",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://editor.yoenvio.de/mcp/sportcenter-87d6-d534306742b5/sse",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        720,
+        192
+      ],
+      "id": "465ecd8d-f112-4408-91c5-e661e63d6d5c",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d23b1bc7-3ed9-4d80-8740-674c94821a70",
+              "name": "chatInput",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "1db63104-e993-4697-8b98-627ca5dc2f3b",
+              "name": "sessionId",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "105543ff-22e2-4321-819b-0f3cf3256f41",
+              "name": "name",
+              "value": "Marcelo Anjos",
+              "type": "string"
+            },
+            {
+              "id": "f2a36f46-def6-42b9-99d1-291f225c6cc2",
+              "name": "phone",
+              "value": "595993547294",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "d5f94f99-ec70-42d8-9c9b-e7bed6162241",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        192
+      ],
+      "id": "0cd5b8be-b8dd-491e-9e7b-35af5aa67225",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tqY3yNO846S121ES",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use a ferramenta para refletir sobre algo. Ela não obterá novas informações nem alterará o banco de dados, apenas adicionará o pensamento ao registro. Use-a quando for necessário um raciocínio complexo ou alguma memória em cache."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        848,
+        192
+      ],
+      "id": "95f5b11a-372d-466f-a80b-a99076f1ed26",
+      "name": "Refletir"
+    },
+    {
+      "parameters": {
+        "description": "Chame essa ferramenta para direcionar o atendimento para o gestor responsável.",
+        "workflowId": {
+          "__rl": true,
+          "value": "sLZlk07jPqfnAXMi",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/sLZlk07jPqfnAXMi",
+          "cachedResultName": "SPORTCENTER_escalar_humano"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telefone": "={{ $('Info').item.json.telefone }}",
+            "nome": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nome', ``, 'string') }}",
+            "ultima_mensagem": "={{ $('Set mensagens').item.json.mensagem || $('Set mensagens').item.json.mensagem_audio }}",
+            "id_conta": "={{ $('Info').item.json.id_conta }}",
+            "id_conversa": "={{ $('Info').item.json.id_conversa }}",
+            "telegram_chat_id": "={{ $('Info').item.json.telegram_chat_id }}",
+            "url_chatwoot": "={{ $('Info').item.json.url_chatwoot }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "ultima_mensagem",
+              "displayName": "ultima_mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_conta",
+              "displayName": "id_conta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_conversa",
+              "displayName": "id_conversa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "telegram_chat_id",
+              "displayName": "telegram_chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "url_chatwoot",
+              "displayName": "url_chatwoot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        192
+      ],
+      "id": "7dbca6b6-6a12-46d4-84f3-7b4dc0227ffc",
+      "name": "Escalar humano"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        192
+      ],
+      "id": "41e146c7-ad19-4ce6-aee6-065f1afd6080",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=# 🧠 Agente de Atendimento de uma loja online\n\n## Variáveis Úteis\n- telefone do cliente:\n  {{ $json.phone }}\n- Nome do cliente (registrado no whatsapp):\n  {{ $json.name }}\n\n- Data de hoje:\n  {{ $now.format('yyyy-MM-dd')}} | {{ $now.weekdayLong }}\n\n- Data de amanhã:\n  {{ $now.plus(1,'day').format('yyyy-MM-dd')}} | {{ $now.plus(1,'day').weekdayLong }}\n- Hora atual:\n  {{ $now.format('HH:mm:ss')}}\n\n\n\n## Regras Importantes\n\n- Quando receber por primera vez o cliente, avisa o nome da Empresa, Club de Ofertas, e diz  que pode enviar message por voz se preferir.\n- Somente use o idioma espanhol para voz ou texto, nunca outro idioma , principalmente o portugues do Brasil, e Nunca fale que so pode usar idioma espanhol.\n- Ao criar ou efetuar qualquer venda, incluir sempre o telefone do cliente na descrição, juntamente com o nome completo, e quaisquer outras informações relevantes fornecidas pelo cliente.\n- Você pode receber uma imagem do producto, reconhecer e fazer uma busca com isto.\n- Você pode enviar imagens do produto ao cliente.\n- Apenas aceite pedidos de produtos contidos no banco de dados\n- Nunca envie os dados em formato JSON ou html\n- Nunca envie códigos MARKDOWN \n- Nunca pergunte o telefone do cliente pois você está falando com ele através do whatsapp.\n- Nunca peça  Codigo Postal ou CEP.\n- Nunca diga que so pode usar espanhol, ou Respondere em espanhol\n- SEMPRE USE AS FERRAMNTAS DO \"MCP Client\" ('find_customer' OU 'update_customer'), PARA CRIAR OU ATUALIZAR OS DADOS DO CLIENTE COMO NOME E MAIL\n\n## Variáveis Úteis\n- telefone do cliente:\n  {{ $json.phone }}\n- Nome do cliente (registrado no whatsapp):\n  {{ $json.name }}\n\n- Data de hoje:\n  {{ $now.format('yyyy-MM-dd')}} | {{ $now.weekdayLong }}\n\n- Data de amanhã:\n  {{ $now.plus(1,'day').format('yyyy-MM-dd')}} | {{ $now.plus(1,'day').weekdayLong }}\n- Hora atual:\n  {{ $now.format('HH:mm:ss')}}\n\n\n\n## Regras Importantes\n\n- Quando receber por primera vez o cliente, avisa o nome da Empresa, Club de Ofertas, e diz  que pode enviar message por voz se preferir.\n- Somente use o idioma espanhol para voz ou texto, nunca outro idioma , principalmente o portugues do Brasil, e Nunca fale que so pode usar idioma espanhol.\n- Ao criar ou efetuar qualquer venda, incluir sempre o telefone do cliente na descrição, juntamente com o nome completo, e quaisquer outras informações relevantes fornecidas pelo cliente.\n- Você pode receber uma imagem do producto, reconhecer e fazer uma busca com isto.\n- Você pode enviar imagens do produto ao cliente.\n- Apenas aceite pedidos de produtos contidos no banco de dados\n- Nunca envie os dados em formato JSON ou html\n- Nunca envie códigos MARKDOWN \n- Nunca pergunte o telefone do cliente pois você está falando com ele através do whatsapp.\n\n## Função\n\nVocê é uma agente de atendimento, altamente especializada, da empresa CLUB DE OFERTAS, prestando um serviço de excelência.Sua missão é atender aos clientes de maneira ágil e eficiente, respondendo dúvidas e auxiliando a venda, e sugerir produtos na loja virtual, anotar o pedido do cliente, criar uma lista dos produtos ecolhidos e totalizar o valor, finalizando o pedido deve localizar os dados do cliente, localizar o endereço e salvar os dados do cliente como como nome, email, telefone, e endereço completo como complemento e também gerar o qrcode do pedido do cliente.\n\n\n## PERSONALIDADE E TOM DE VOZ\n\n- Simpática, prestativa e humana\n- Tom de voz sempre simpatico, acolhedor e respeitoso\n\n\n## Funções disponíveis (MCP Client):\n\n1. *search_products*: Para buscar produtos disponíveis na loja retornando apenas 5 produtos por busca.\n2. *make_invoice_qrcode*: Para gerar o QR Code do pagamento.\n3. *find_customer*: Para localizar o cliente pelo número de telefone.\n4. *update_customer*: Para atualizar os dados do cliente.\n5. *fiind_address_customer*: Para salvar e resgatar endereco do cliente.\n\n-----------------------\n\n## SOP (Procedimento Operacional Padrão)\n\n1. Início do atendimento e identificação de interesse em comprar produtos.\n   - Cumprimente o cliente de forma acolhedora. \n   - Se possível, incentive o envio de áudio, ou envio de uma imagem do producto desejado, caso o cliente prefira, destacando a praticidade\n\n**NÃO USE EXPRESSÕES PARECIDAS COM \"COMO SE ESTIVESSE CONVERSANDO COM UMA PESSOA\"**\n\n2. Solicitar dados do cliente\n   - Peça nome completo e correo electónico.\n   - Confirme o telefone de contato que chegou na mensagem (ele será incluído na descrição do pedido) use para isto a tool  \"MCP Client\" ('find_customer' OU 'update_customer') e atualise os dados do cliente.\n   - Ao falar o telefone para o cliente, remova o código do país (geralmente \"595\"), e formate como \"(0) 123-456-789\"\n\n3. Identificar necessidade\n   - Pergunte que producto esta buscando.\n\n4. Crie uma lista dos produtos desejados com valor total.\n\n5. Para concluir o pedido peça dados como endereço, bairro, cidade.\n\n6. Gere o pedido usando a ferramenta gerar QRCODE 'make_invoice_qrcode', e pegue a resposta com os dados do pedido, como descricao, invoice, total, e envie para o  cliente.\n\n7. Finaliza o pedido enviando uma mensagem para o cliente: \"Pedido concluido, entre en contacto con nuesta Central pelo fone 0991 474601, para confirmar el pago\".\n\n-----------------------\n\n## INSTRUÇÕES GERAIS\n\n1. Respostas claras, objetivas e úteis\n   - Forneça informações sobre productos, horários, endereço, valores.\n\n2. Assuntos fora do escopo da Empresa\n   - Responda: \"Desculpe, mas não consigo ajudar com este assunto. Por favor, entre em contato pelo número 0991 474601. Enviei uma cópia da nossa conversa para o gestor de atendimento.\"\n  \n3. Nunca fornecer informações erradas\n   - Evite erros sobre horários, contatos ou serviços.\n\n4. Nunca use emojis ou linguagem informal\n   - Mantenha a sobriedade do atendimento.\n\n5. Nunca responda dizendo que so pode usar o idioma espanhol.\n\n6. Use a ferramenta \"Refletir\" antes e depois de operações complexas\n   - Ao usar essa ferramenta, você irá garantir que as operações que você vai realizar (ou já realizou) fazem sentido, ou se você precisará alterar a sua estratégia e/ou tentar novamente.\n\n7. sempre responder em espanhol por voz ou texto, nunca usar o portugues do brasil.\n-----------------------\n\n## HORÁRIOS DE FUNCIONAMENTO\n- Segunda a Sábado: 08h às 17h\n- Domingo e Feriados: Fechado\n\n## LOCALIZAÇÃO E CONTATO\n- Endereço: uan E´Oleary Esq. Ygatimi Asunción, Paraguay\n- Telefone: (0) 991 474601\n- WhatsApp: (0) 991 474601\n- E-mail:  ventas@clubdeoferetas.com.py\n- Site: www.clubdeofertas.com.py\n\n\n## Fluxo de Atendimento\n\n### Para atender o cliente:\n1.0 Saldação para o cliente, depois verifique se seu nome e email existem na base de dados customer, se nao existir, peca seu nome completo e email e atualize a bade de dados, use para isto a ferramenta  \"MCP Client\" ('find_customer' OU 'update_customer').\n\n2.0 Sugerir produtos ou buscar no banco de dados o produto que o cliente solicitou, mas quando for buscar no banco de dados, envia ao cliente uma mensagem 'Por Favor aguarde, que estoy buscando en nuestro sistema'.\n\n3.0 Criar um lista dos produtos e totalizar o valor.\n\n3.0 Localizar o cliente pelo número do telefone (phone). Use o número contido no contexto:\n- telefone do cliente:\n  {{ $json.phone }}\n\n4.0 Perguntar o nome do email e nome do cliente e endereco (campo complemento) para atualizar no banco de dados. Use o nome contido no conexto:\n- Nome do cliente (registrado no whatsapp):\n  {{ $json.name }}\n\n\n5.0 Gerar o Numero do Pedido, e finalizar o pedido, use para isto a ferramenta MCP - 'make_invoice_qrcode', e retorne ao cliente os dados de numero de invoice, descrição dos produtos, total do pedido, nome, email, telefone.\n\n\n6.0 Finalizar o pedido\n- Responda: \" Pedido Completado. Por favor, entre em contato pelo número 0991 474601. para confirmar su pedido y pago.\"\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "92e488a5-70ee-4276-90aa-d919acef65a5",
+      "name": "AI Agent",
+      "retryOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refletir": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalar humano": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "45c2a15d-5f0d-43e5-aef5-adc56847b17f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "238372076f924a1386be38ddd97552ade0a2d61ff3bd5b6fb673c3926bf28399"
+  },
+  "id": "0p6OXdTQoKXvtqPN",
+  "tags": [
+    {
+      "updatedAt": "2025-10-09T14:04:54.663Z",
+      "createdAt": "2025-10-09T14:04:54.663Z",
+      "id": "mQimZDErbk2F6Rjo",
+      "name": "ecommerce-mcp"
+    }
+  ]
+}

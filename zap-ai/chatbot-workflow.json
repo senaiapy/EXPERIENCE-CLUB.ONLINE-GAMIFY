@@ -1,0 +1,624 @@
+{
+  "name": "Experience Club AI Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "club-ofertas-chat"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversations",
+          "mode": "list",
+          "cachedResultName": "conversations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.body.sessionId }}",
+            "user_id": "={{ $json.body.userId }}",
+            "user_message": "={{ $json.body.message }}",
+            "timestamp": "={{ $json.body.timestamp }}",
+            "context": "={{ JSON.stringify($json.body.context) }}",
+            "page": "={{ $json.body.context.page }}",
+            "user_agent": "={{ $json.body.context.userAgent }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "save-message",
+      "name": "Save User Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "PostgreSQL - Club Ofertas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversations",
+          "mode": "list"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "condition": "equal",
+              "value": "={{ $json.body.sessionId }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "created_at",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "limit": 10,
+        "options": {}
+      },
+      "id": "get-conversation-history",
+      "name": "Get Conversation History",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "PostgreSQL - Club Ofertas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build conversation context for AI\nconst userMessage = $input.first().json.body.message;\nconst history = $input.all().slice(1);\n\n// Format conversation history\nlet conversationContext = \"Chat History:\\n\";\nhistory.forEach((item, index) => {\n  const msg = item.json;\n  conversationContext += `User: ${msg.user_message}\\n`;\n  if (msg.bot_response) {\n    conversationContext += `Assistant: ${msg.bot_response}\\n`;\n  }\n});\n\nconversationContext += `\\nCurrent User Message: ${userMessage}`;\n\n// Extract intent keywords\nconst lowerMessage = userMessage.toLowerCase();\nlet intent = 'general';\nlet suggestions = [];\n\nif (lowerMessage.includes('precio') || lowerMessage.includes('costo') || lowerMessage.includes('cuanto')) {\n  intent = 'pricing';\n  suggestions = ['Ver catálogo completo', 'Ofertas especiales', 'Métodos de pago'];\n} else if (lowerMessage.includes('envio') || lowerMessage.includes('entrega') || lowerMessage.includes('envío')) {\n  intent = 'shipping';\n  suggestions = ['Ver política de envío', 'Sucursales', 'Hablar con asesor'];\n} else if (lowerMessage.includes('pedido') || lowerMessage.includes('orden') || lowerMessage.includes('compra')) {\n  intent = 'order_status';\n  suggestions = ['Ver mis pedidos', 'Rastrear envío', 'Contactar soporte'];\n} else if (lowerMessage.includes('producto') || lowerMessage.includes('perfume') || lowerMessage.includes('marca')) {\n  intent = 'product_inquiry';\n  suggestions = ['Ver productos', 'Buscar por marca', 'Categorías'];\n} else if (lowerMessage.includes('hola') || lowerMessage.includes('ayuda') || lowerMessage.includes('info')) {\n  intent = 'greeting';\n  suggestions = ['Ver productos', 'Mis pedidos', 'Información de envío', 'Contacto'];\n}\n\nreturn {\n  userMessage,\n  conversationContext,\n  intent,\n  suggestions,\n  sessionId: $input.first().json.body.sessionId,\n  userId: $input.first().json.body.userId\n};"
+      },
+      "id": "process-context",
+      "name": "Process Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "intent-greeting",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "greeting",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "intent-pricing",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "pricing",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "intent-shipping",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "shipping",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "intent-order",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "order_status",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "intent-product",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "product_inquiry",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "route-by-intent",
+      "name": "Route by Intent",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-greeting",
+              "name": "response",
+              "value": "¡Hola! 👋 Bienvenido a Experience Club. Somos tu tienda de perfumes y productos de belleza en Paraguay. \\n\\n¿En qué puedo ayudarte hoy? Puedo asistirte con:\\n• Información de productos\\n• Estado de pedidos\\n• Métodos de pago y envío\\n• Recomendaciones personalizadas",
+              "type": "string"
+            },
+            {
+              "id": "suggestions-greeting",
+              "name": "suggestions",
+              "value": "={{ $json.suggestions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-greeting",
+      "name": "Greeting Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1250, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-pricing",
+              "name": "response",
+              "value": "💰 **Información de Precios**\\n\\nTenemos una amplia variedad de productos con precios competitivos en Guaraníes (₲).\\n\\n• Perfumes desde ₲150.000\\n• Fragancias de lujo desde ₲400.000\\n• Productos de belleza desde ₲50.000\\n\\n**Promociones activas:**\\n✅ Descuentos especiales en perfumes seleccionados\\n✅ Envío gratis en compras mayores a ₲730.000\\n\\n¿Te gustaría ver alguna categoría específica?",
+              "type": "string"
+            },
+            {
+              "id": "suggestions-pricing",
+              "name": "suggestions",
+              "value": "={{ $json.suggestions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-pricing",
+      "name": "Pricing Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1250, 250]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-shipping",
+              "name": "response",
+              "value": "🚚 **Información de Envío**\\n\\nOfrecemos envío a todo Paraguay:\\n\\n**Ciudades disponibles:**\\n• Asunción\\n• Ciudad del Este\\n• Encarnación\\n• San Lorenzo\\n• Luque\\n• Pedro Juan Caballero\\n• Capitán Bado\\n• Coronel Oviedo\\n\\n**Costos de envío:**\\n• Envío estándar: ₲43.770\\n• 🎁 GRATIS en compras mayores a ₲730.000\\n\\n**Tiempo de entrega:** 2-5 días hábiles\\n\\n¿Necesitas más información?",
+              "type": "string"
+            },
+            {
+              "id": "suggestions-shipping",
+              "name": "suggestions",
+              "value": "={{ $json.suggestions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-shipping",
+      "name": "Shipping Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response-order",
+              "name": "response",
+              "value": "📦 **Estado de Pedido**\\n\\nPara consultar el estado de tu pedido, necesito que me proporciones:\\n\\n1. **Email** de registro\\n2. **Número de pedido** (si lo tienes)\\n\\nTambién puedes:\\n• Iniciar sesión en tu cuenta\\n• Ir a \"Mis Pedidos\"\\n• Ver el estado en tiempo real\\n\\n¿Tienes tu número de pedido?",
+              "type": "string"
+            },
+            {
+              "id": "suggestions-order",
+              "name": "suggestions",
+              "value": "={{ $json.suggestions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "response-order",
+      "name": "Order Status Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1250, 550]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "message",
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres un asistente virtual amigable de Experience Club, una tienda de perfumes y productos de belleza en Paraguay. Responde en español con emojis apropiados. Sé servicial, profesional y entusiasta. Si no sabes algo, ofrece conectar con un asesor humano."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.conversationContext }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "id": "openai-response",
+      "name": "OpenAI GPT Response",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.3,
+      "position": [1250, 700],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all responses\nconst items = $input.all();\nlet finalResponse = '';\nlet suggestions = [];\n\n// Get the response from whichever branch was executed\nfor (const item of items) {\n  if (item.json.response) {\n    finalResponse = item.json.response;\n    suggestions = item.json.suggestions || [];\n    break;\n  }\n  // Handle OpenAI response format\n  if (item.json.choices && item.json.choices[0]) {\n    finalResponse = item.json.choices[0].message.content;\n    suggestions = ['Ver productos', 'Contactar soporte', 'Más información'];\n    break;\n  }\n}\n\nreturn {\n  response: finalResponse || 'Gracias por tu mensaje. ¿En qué más puedo ayudarte?',\n  suggestions: suggestions,\n  responseId: `resp_${Date.now()}`,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "merge-responses",
+      "name": "Merge Responses",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversations",
+          "mode": "list"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "value": "={{ $('Save User Message').item.json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "bot_response": "={{ $json.response }}",
+            "response_id": "={{ $json.responseId }}",
+            "suggestions": "={{ JSON.stringify($json.suggestions) }}",
+            "updated_at": "={{ $json.timestamp }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "update-conversation",
+      "name": "Update Conversation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "PostgreSQL - Club Ofertas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  response: $json.response,\n  responseId: $json.responseId,\n  suggestions: $json.suggestions,\n  timestamp: $json.timestamp\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "analytics",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('Process Context').item.json.sessionId }}",
+            "intent": "={{ $('Process Context').item.json.intent }}",
+            "user_id": "={{ $('Process Context').item.json.userId }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "response_time_ms": "={{ Date.now() - new Date($('Webhook').item.json.body.timestamp).getTime() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-analytics",
+      "name": "Log Analytics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1650, 500],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "PostgreSQL - Club Ofertas"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Save User Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save User Message": {
+      "main": [
+        [
+          {
+            "node": "Get Conversation History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversation History": {
+      "main": [
+        [
+          {
+            "node": "Process Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Context": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent": {
+      "main": [
+        [
+          {
+            "node": "Greeting Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pricing Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Shipping Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Order Status Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI GPT Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Greeting Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pricing Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shipping Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Status Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT Response": {
+      "main": [
+        [
+          {
+            "node": "Merge Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Responses": {
+      "main": [
+        [
+          {
+            "node": "Update Conversation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Conversation": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.114.0",
+  "id": "club-ofertas-chatbot",
+  "meta": {
+    "instanceId": "club-ofertas-prod"
+  },
+  "tags": [
+    {
+      "createdAt": "2025-10-15T00:00:00.000Z",
+      "updatedAt": "2025-10-15T00:00:00.000Z",
+      "id": "1",
+      "name": "ai-chatbot"
+    },
+    {
+      "createdAt": "2025-10-15T00:00:00.000Z",
+      "updatedAt": "2025-10-15T00:00:00.000Z",
+      "id": "2",
+      "name": "customer-service"
+    }
+  ]
+}

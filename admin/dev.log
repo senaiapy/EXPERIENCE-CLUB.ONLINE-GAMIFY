@@ -1,0 +1,63 @@
+
+> ecommerce-store@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+   ▲ Next.js 14.0.0
+   - Local:        http://localhost:3001
+
+ ✓ Ready in 2.4s
+ ○ Compiling /page ...
+ ✓ Compiled /page in 3.9s (430 modules)
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+digest: "1539641966"
+ ✓ Compiled in 332ms (220 modules)
+ ✓ Compiled in 293ms (220 modules)
+ ✓ Compiled /page in 241ms (407 modules)
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+digest: "1539641966"
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+ ✓ Compiled in 350ms (220 modules)
+ ✓ Compiled /page in 181ms (201 modules)
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+digest: "1539641966"
+ ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <img src=... alt=... className=... onError={function}>
+                                             ^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>)
+ ✓ Compiled in 250ms (220 modules)
+ ✓ Compiled in 143ms (220 modules)
+ ✓ Compiled in 115ms (220 modules)
+ ✓ Compiled in 115ms (220 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/home/galo/Desktop/CLUBDEOFERTAS/clubdeofertas_data/.next/cache/webpack/client-development/2.pack.gz_' -> '/home/galo/Desktop/CLUBDEOFERTAS/clubdeofertas_data/.next/cache/webpack/client-development/2.pack.gz'
+ ✓ Compiled in 148ms (220 modules)
+ ✓ Compiled in 123ms (220 modules)
+ ✓ Compiled in 156ms (220 modules)
+ ✓ Compiled in 127ms (220 modules)
+ ✓ Compiled in 128ms (220 modules)
+ ✓ Compiled in 231ms (220 modules)
+ ✓ Compiled in 263ms (220 modules)
+ ✓ Compiled in 156ms (220 modules)
+ ✓ Compiled /page in 186ms (201 modules)
